@@ -84,6 +84,17 @@ class QMPCServer:
                 is_ok &= b["is_ok"]
         return is_ok, response
 
+    @staticmethod
+    def __stream_result(stream: Iterable) -> Dict:
+        """ エラーチェックしてstreamのresultを得る """
+        is_ok: bool = True
+        res_list = []
+        for res in stream:
+            is_ok &= res.is_ok
+            res_list.append(res)
+        res_dict: Dict = {"is_ok": is_ok, "responses": res_list}
+        return res_dict
+
     @methoddispatch()
     def send_share(self, _):
         raise ArgmentError("不正な引数が与えられています．")
@@ -169,14 +180,25 @@ class QMPCServer:
         )
         # 非同期にリクエスト送信
         executor = ThreadPoolExecutor()
-        futures = [executor.submit(stub.GetComputationResult, req)
+        futures = [executor.submit(QMPCServer.__stream_result,
+                                   stub.GetComputationResult(req))
                    for stub in self.__client_stubs]
         is_ok, response = QMPCServer.__futures_result(futures)
-        statuses = [r.status for r in response] if is_ok else None
+
+        # 各statusの最小値を求める
+        statuses = [min(map(lambda r: r.status, res["responses"]))
+                    for res in response]
         all_completed = all([
             s == JobStatus.Value('COMPLETED') for s in statuses
         ]) if statuses is not None else False
-        results = [eval(r.result) for r in response] if all_completed else None
+
+        # piece_id順にresultを結合
+        results_sorted = [sorted(res["responses"], key=lambda r: r.piece_id)
+                          for res in response]
+        results_str = ["".join(map(lambda r: r.result, res))
+                       for res in results_sorted]
+        results = [eval(eval(r))
+                   for r in results_str] if all_completed else None
 
         # reconsして返す
         results = if_present(results, Share.recons)

@@ -33,12 +33,18 @@ class LibToManageServiceServicer(libc_to_manage_pb2_grpc.LibcToManageServicer):
         return res
 
     def GetComputationResult(self, request, context):
-        res = libc_to_manage_pb2.GetComputationResultResponse(
+        yield libc_to_manage_pb2.GetComputationResultResponse(
             message="ok",
             is_ok=True,
-            result="['1']"
+            result="['1',",
+            piece_id=1,
         )
-        return res
+        yield libc_to_manage_pb2.GetComputationResultResponse(
+            message="ok",
+            is_ok=True,
+            result="'2']",
+            piece_id=2,
+        )
 
     def SendModelParam(self, request, context):
         res = libc_to_manage_pb2.GetComputationResultResponse(
