@@ -187,7 +187,7 @@ class QMPCServer:
 
         # 各statusの最小値を求める
         statuses = [min(map(lambda r: r.status, res["responses"]))
-                    for res in response]
+                    for res in response] if response else None
         all_completed = all([
             s == JobStatus.Value('COMPLETED') for s in statuses
         ]) if statuses is not None else False
