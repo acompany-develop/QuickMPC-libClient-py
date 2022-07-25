@@ -61,3 +61,18 @@ class MakePiece:
             dst[index].append(row)
 
         return dst
+
+    @make_pieces.register(str)
+    @staticmethod
+    def __make_pieces_str(src: str, max_size: int) -> List[str]:
+        dst: List[str] = []
+        current: str = ""
+        for ch in src:
+            current += ch
+
+            if len(current) == max_size:
+                dst.append(current)
+                current = ""
+        if current:
+            dst.append(current)
+        return dst

@@ -1,6 +1,7 @@
 from typing import List
 
 import pytest
+
 from quickmpc.utils.make_pieces import MakePiece
 from quickmpc.utils.overload_tools import ArgmentError
 
@@ -19,6 +20,19 @@ class TestQMPC:
     )
     def test_make_pieces(self, matrix, size, expected):
         actual = MakePiece.make_pieces(matrix, size)
+        assert(actual == expected)
+
+    @pytest.mark.parametrize(
+        ("string, size,expected"),
+        [
+            ("aaabbbcccddd", 6, ["aaabbb", "cccddd"]),
+            ("aaabbbcccddd", 9, ["aaabbbccc", "ddd"]),
+            ("aaabbbcccddd", 12, ["aaabbbcccddd"]),
+            ("aaabbbcccddd", 15, ["aaabbbcccddd"]),
+        ]
+    )
+    def test_make_pieces_string(self, string, size, expected):
+        actual = MakePiece.make_pieces(string, size)
         assert(actual == expected)
 
     @pytest.mark.parametrize(
