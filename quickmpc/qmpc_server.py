@@ -205,20 +205,26 @@ class QMPCServer:
         return {"is_ok": is_ok, "statuses": statuses, "results": results}
 
     def send_model_params(self, params: list,
-                          party_size: int) -> Dict:
+                          party_size: int,
+                          piece_size: int) -> Dict:
         """ モデルパラメータをコンテナに送信 """
         # リクエストパラメータを設定
         job_uuid: str = str(uuid.uuid4())
         params_share: list = Share.sharize(params, party_size)
-        reqs = [SendModelParamRequest(job_uuid=job_uuid,
-                                      params=json.dumps(param),
-                                      token=self.token)
-                for param in params_share]
+
+        params_share_pieces: list = [MakePiece.make_pieces(
+            json.dumps(p), piece_size) for p in params_share]
 
         # 非同期にリクエスト送信
         executor = ThreadPoolExecutor()
-        futures = [executor.submit(stub.SendModelParam, req)
-                   for stub, req in zip(self.__client_stubs, reqs)]
+        futures = [executor.submit(stub.SendModelParam,
+                                   SendModelParamRequest(job_uuid=job_uuid,
+                                                         params=param,
+                                                         piece_id=piece_id+1,
+                                                         token=self.token))
+                   for pieces, stub in zip(params_share_pieces,
+                                           self.__client_stubs)
+                   for piece_id, param in enumerate(pieces)]
         is_ok, _ = QMPCServer.__futures_result(futures)
 
         return {"is_ok": is_ok, "job_uuid": job_uuid}

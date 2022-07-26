@@ -5,9 +5,10 @@ from google.protobuf.internal import enum_type_wrapper
 
 from .proto.common_types import common_types_pb2
 from .qmpc_server import QMPCServer
+from .share import Share
 from .utils.parse_csv import (parse, parse_csv, parse_csv_to_bitvector,
                               parse_to_bitvector)
-from .share import Share
+
 # qmpc.JobStatus でアクセスできるようにエイリアスを設定する
 JobStatus: enum_type_wrapper.EnumTypeWrapper \
     = common_types_pb2.JobStatus
@@ -112,8 +113,11 @@ class QMPC:
     def get_computation_result(self, job_id: str) -> Dict:
         return self.__qmpc_server.get_computation_result(job_id)
 
-    def send_model_params(self, params: list, party_size: int = 3,) -> Dict:
-        return self.__qmpc_server.send_model_params(params, party_size)
+    def send_model_params(self, params: list,
+                          party_size: int = 3,
+                          piece_size: int = 1_000_000) -> Dict:
+        return self.__qmpc_server.send_model_params(
+            params, party_size, piece_size)
 
     def linear_regression_predict(self,
                                   model_param_job_uuid: str,
