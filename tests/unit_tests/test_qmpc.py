@@ -45,7 +45,7 @@ class TestQMPC:
     def test_send_model_params(self, run_server1, run_server2, run_server3):
         """ serverにモデルパラメータを送れるかのTest"""
         res: Dict[str, Any] = self.qmpc.send_model_params(
-            [[1, 2, 3]], 3)
+            [[1, 2, 3]], 3, 1000)
         assert(res["is_ok"])
 
     def test_predict(self, run_server1, run_server2, run_server3):
