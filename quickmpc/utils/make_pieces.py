@@ -30,6 +30,7 @@ class MakePiece:
     def make_pieces(_, __):
         raise ArgmentError("不正な引数が与えられています．")
 
+    @staticmethod
     def check_max_size(max_size: int):
         # NOTE: Couchbaseのアイテムサイズ上限:1MB
         # NOTE: grpcの送受信データサイズ上限:4MB
