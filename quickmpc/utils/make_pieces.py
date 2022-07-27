@@ -30,6 +30,22 @@ class MakePiece:
     def make_pieces(_, __):
         raise ArgmentError("不正な引数が与えられています．")
 
+    def check_max_size(max_size: int):
+        # NOTE: Couchbaseのアイテムサイズ上限:1MB
+        # NOTE: grpcの送受信データサイズ上限:4MB
+        lower_limit_size: int = 1
+        upper_limit_size: int = 1_000_000
+        if max_size > upper_limit_size:
+            raise RuntimeError(
+                f"max size of piece ({max_size}) is over "
+                f"specified limit size ({upper_limit_size})"
+            )
+        if max_size < lower_limit_size:
+            raise RuntimeError(
+                f"max size of piece ({max_size}) is under "
+                f"specified limit size ({lower_limit_size})"
+            )
+
     @make_pieces.register(Dim1)
     @staticmethod
     def __make_pieces_1d(src: List[str], _) -> List[List[str]]:
@@ -40,6 +56,7 @@ class MakePiece:
     def __make_pieces_2d(src: List[List[str]],
                          max_size: int
                          ) -> List[List[List[str]]]:
+        MakePiece.check_max_size(max_size)
         cur_size = 0
         index = 0
         dst: List[List[List[str]]] = [[]]
@@ -65,6 +82,7 @@ class MakePiece:
     @make_pieces.register(str)
     @staticmethod
     def __make_pieces_str(src: str, max_size: int) -> List[str]:
+        MakePiece.check_max_size(max_size)
         dst: List[str] = []
         current: str = ""
         for ch in src:

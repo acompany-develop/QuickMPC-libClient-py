@@ -52,12 +52,25 @@ class TestQMPC:
     @pytest.mark.parametrize(
         ("args, error"),
         [
-            ([MATRIX, 0], RuntimeError),    # サイズが小さい場合
-            ([0, 0], ArgmentError),         # 引数タイプが無効な場合: 0 次元
-            ([[MATRIX], 0], ArgmentError),  # 引数タイプが無効な場合: 3 次元
+            ([MATRIX, 0], RuntimeError),          # サイズが小さい場合
+            ([MATRIX, 1_000_001], RuntimeError),  # サイズが大きい場合
+            ([0, 0], ArgmentError),               # 引数タイプが無効な場合: 0 次元
+            ([[MATRIX], 0], ArgmentError),        # 引数タイプが無効な場合: 3 次元
         ]
     )
     def test_make_pieces_errorhandring(self, args, error):
+        """ 異常値を与えてエラーが出るかTest """
+        with pytest.raises(error):
+            MakePiece.make_pieces(*args)
+
+    @pytest.mark.parametrize(
+        ("args, error"),
+        [
+            (["string", 0], RuntimeError),          # サイズが小さい場合
+            (["string", 1_000_001], RuntimeError),  # サイズが大きい場合
+        ]
+    )
+    def test_make_pieces_str_errorhandring(self, args, error):
         """ 異常値を与えてエラーが出るかTest """
         with pytest.raises(error):
             MakePiece.make_pieces(*args)
