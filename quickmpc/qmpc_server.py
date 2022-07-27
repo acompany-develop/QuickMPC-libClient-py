@@ -185,16 +185,17 @@ class QMPCServer:
                    for stub in self.__client_stubs]
         is_ok, response = QMPCServer.__futures_result(futures)
 
-        # 各statusの最小値を求める
-        statuses = [min(map(lambda r: r.status, res["responses"]))
-                    for res in response] if response else None
+        results_sorted = [sorted(res["responses"], key=lambda r: r.piece_id)
+                          for res in response]
+
+        # NOTE: statusは0番目(piece_id=1)の要素にのみ含まれている
+        statuses = [res[0].status for res in results_sorted] \
+            if results_sorted else None
         all_completed = all([
             s == JobStatus.Value('COMPLETED') for s in statuses
         ]) if statuses is not None else False
 
         # piece_id順にresultを結合
-        results_sorted = [sorted(res["responses"], key=lambda r: r.piece_id)
-                          for res in response]
         results_str = ["".join(map(lambda r: r.result, res))
                        for res in results_sorted]
         results = [eval(eval(r))
