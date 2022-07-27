@@ -25,10 +25,24 @@ class TestQMPC:
     @pytest.mark.parametrize(
         ("string, size,expected"),
         [
+            # 空文字列
+            ("", 1, []),
+            ("", 3, []),
+            # 短めの文字列
             ("aaabbbcccddd", 6, ["aaabbb", "cccddd"]),
             ("aaabbbcccddd", 9, ["aaabbbccc", "ddd"]),
             ("aaabbbcccddd", 12, ["aaabbbcccddd"]),
             ("aaabbbcccddd", 15, ["aaabbbcccddd"]),
+            # 長めの文字列
+            ("".join(["a" for _ in range(1_000_000)]), 1,
+             ["".join(["a" for _ in range(1)]) for _ in range(1_000_000)]),
+            ("".join(["a" for _ in range(1_000_000)]), 1_000,
+             ["".join(["a" for _ in range(1_000)]) for _ in range(1_000)]),
+            ("".join(["a" for _ in range(1_000_000)]), 1_000_000,
+             ["".join(["a" for _ in range(1_000_000)]) for _ in range(1)]),
+            # 特殊な文字
+            ("!\"#$%&'()=~|-^@`[]{};+:*,<.>/?", 5,
+             ["!\"#$%", "&'()=", "~|-^@", "`[]{}", ";+:*,", "<.>/?"]),
         ]
     )
     def test_make_pieces_string(self, string, size, expected):
