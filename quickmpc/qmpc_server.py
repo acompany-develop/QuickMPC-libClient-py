@@ -42,6 +42,7 @@ class QMPCServer:
         stubs = [LibcToManageStub(QMPCServer.__create_grpc_channel(ep))
                  for ep in endpoints]
         object.__setattr__(self, "_QMPCServer__client_stubs", stubs)
+        object.__setattr__(self, "party_size", len(endpoints))
 
     @staticmethod
     def __create_grpc_channel(endpoint: str) -> grpc.Channel:
@@ -101,7 +102,7 @@ class QMPCServer:
         data_id: str = hashlib.sha256(
             str(sorted_secrets).encode() + struct.pack('d', time.time())
         ).hexdigest()
-        shares = [Share.sharize(s, party_size) for s in pieces]
+        shares = [Share.sharize(s, self.party_size) for s in pieces]
         sent_at = str(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
         # リクエストパラメータを設定して非同期にリクエスト送信
@@ -185,7 +186,7 @@ class QMPCServer:
         """ モデルパラメータをコンテナに送信 """
         # リクエストパラメータを設定
         job_uuid: str = str(uuid.uuid4())
-        params_share: list = Share.sharize(params, party_size)
+        params_share: list = Share.sharize(params, self.party_size)
         reqs = [SendModelParamRequest(job_uuid=job_uuid,
                                       params=json.dumps(param),
                                       token=self.token)

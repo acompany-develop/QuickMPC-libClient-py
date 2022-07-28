@@ -28,6 +28,7 @@ class QMPC:
 
     def __post_init__(self, endpoints: List[str],
                       token: str):
+        object.__setattr__(self, "party_size", len(endpoints))
         object.__setattr__(self, "_QMPC__qmpc_server", QMPCServer(
             endpoints, token))
 
@@ -157,5 +158,5 @@ class QMPC:
         return self.__qmpc_server.get_data_list()
 
     def demo_sharize(self, secrets: List) -> Dict:
-        share = Share.sharize(secrets, party_size)
+        share = Share.sharize(secrets, self.party_size)
         return {'is_ok': True, 'results': share}
