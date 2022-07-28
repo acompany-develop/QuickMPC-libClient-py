@@ -17,9 +17,8 @@ from .proto.common_types.common_types_pb2 import JobStatus
 from .proto.libc_to_manage_pb2 import (DeleteSharesRequest,
                                        ExecuteComputationRequest,
                                        GetComputationResultRequest,
-                                       GetDataListRequest,
-                                       Input, JoinOrder, PredictRequest,
-                                       SendModelParamRequest,
+                                       GetDataListRequest, Input, JoinOrder,
+                                       PredictRequest, SendModelParamRequest,
                                        SendSharesRequest)
 from .proto.libc_to_manage_pb2_grpc import LibcToManageStub
 from .share import Share
@@ -92,7 +91,7 @@ class QMPCServer:
     @send_share.register(Dim3)
     def __send_share_impl(self, secrets: List, schema: List[str],
                           matching_column: int,
-                          party_size: int, piece_size: int) -> Dict:
+                          piece_size: int) -> Dict:
         """ Shareをコンテナに送信 """
         sorted_secrets = sorted(
             secrets, key=lambda row: row[matching_column-1])
@@ -182,8 +181,7 @@ class QMPCServer:
         results = if_present(results, Share.recons)
         return {"is_ok": is_ok, "statuses": statuses, "results": results}
 
-    def send_model_params(self, params: list,
-                          party_size: int) -> Dict:
+    def send_model_params(self, params: list) -> Dict:
         """ モデルパラメータをコンテナに送信 """
         # リクエストパラメータを設定
         job_uuid: str = str(uuid.uuid4())

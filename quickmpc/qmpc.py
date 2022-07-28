@@ -5,9 +5,10 @@ from google.protobuf.internal import enum_type_wrapper
 
 from .proto.common_types import common_types_pb2
 from .qmpc_server import QMPCServer
+from .share import Share
 from .utils.parse_csv import (parse, parse_csv, parse_csv_to_bitvector,
                               parse_to_bitvector)
-from .share import Share
+
 # qmpc.JobStatus でアクセスできるようにエイリアスを設定する
 JobStatus: enum_type_wrapper.EnumTypeWrapper \
     = common_types_pb2.JobStatus
@@ -50,9 +51,9 @@ class QMPC:
 
     def send_share(self, secrets: List, schema: List[str],
                    matching_column: int = 1,
-                   party_size: int = 3, piece_size: int = 1_000_000) -> Dict:
+                   piece_size: int = 1_000_000) -> Dict:
         return self.__qmpc_server.send_share(
-            secrets, schema, matching_column,  party_size, piece_size)
+            secrets, schema, matching_column, piece_size)
 
     def delete_share(self, data_ids: List[str]) -> Dict:
         return self.__qmpc_server.delete_share(data_ids)
@@ -112,8 +113,8 @@ class QMPC:
     def get_computation_result(self, job_id: str) -> Dict:
         return self.__qmpc_server.get_computation_result(job_id)
 
-    def send_model_params(self, params: list, party_size: int = 3,) -> Dict:
-        return self.__qmpc_server.send_model_params(params, party_size)
+    def send_model_params(self, params: list) -> Dict:
+        return self.__qmpc_server.send_model_params(params)
 
     def linear_regression_predict(self,
                                   model_param_job_uuid: str,
@@ -155,7 +156,6 @@ class QMPC:
             -> Dict:
         return self.__qmpc_server.get_data_list()
 
-    def demo_sharize(self, secrets: List,
-                     party_size: int = 3) -> Dict:
+    def demo_sharize(self, secrets: List) -> Dict:
         share = Share.sharize(secrets, party_size)
         return {'is_ok': True, 'results': share}
