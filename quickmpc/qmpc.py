@@ -25,12 +25,13 @@ class QMPC:
     token: InitVar[str] = "token_demo"
 
     __qmpc_server: QMPCServer = field(init=False)
+    __party_size: int = field(init=False)
 
     def __post_init__(self, endpoints: List[str],
                       token: str):
-        object.__setattr__(self, "party_size", len(endpoints))
         object.__setattr__(self, "_QMPC__qmpc_server", QMPCServer(
             endpoints, token))
+        object.__setattr__(self, "_QMPC__party_size", len(endpoints))
 
     def parse_csv_file(self, filename: str) \
             -> Tuple[List[List[float]], List[str]]:
@@ -158,5 +159,5 @@ class QMPC:
         return self.__qmpc_server.get_data_list()
 
     def demo_sharize(self, secrets: List) -> Dict:
-        share = Share.sharize(secrets, self.party_size)
+        share = Share.sharize(secrets, self.__party_size)
         return {'is_ok': True, 'results': share}
