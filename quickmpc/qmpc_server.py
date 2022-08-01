@@ -1,0 +1,238 @@
+import datetime
+import hashlib
+import json
+import logging
+import os
+import struct
+import time
+import uuid
+from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass, field, InitVar
+from typing import Dict, Iterable, List, Tuple
+from urllib.parse import urlparse
+
+import grpc
+
+from .proto.common_types.common_types_pb2 import JobStatus
+from .proto.libc_to_manage_pb2 import (DeleteSharesRequest,
+                                       ExecuteComputationRequest,
+                                       GetComputationResultRequest,
+                                       GetDataListRequest,
+                                       Input, JoinOrder, PredictRequest,
+                                       SendModelParamRequest,
+                                       SendSharesRequest)
+from .proto.libc_to_manage_pb2_grpc import LibcToManageStub
+from .share import Share
+from .utils.if_present import if_present
+from .utils.make_pieces import MakePiece
+from .utils.overload_tools import ArgmentError, Dim2, Dim3, methoddispatch
+
+abs_file = os.path.abspath(__file__)
+base_dir = os.path.dirname(abs_file)
+
+logger = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class QMPCServer:
+    endpoints: InitVar[List[str]]
+    __client_stubs: Tuple[LibcToManageStub] = field(init=False)
+    token: str
+
+    def __post_init__(self, endpoints: List[str]) -> None:
+        stubs = [LibcToManageStub(QMPCServer.__create_grpc_channel(ep))
+                 for ep in endpoints]
+        object.__setattr__(self, "_QMPCServer__client_stubs", stubs)
+
+    @staticmethod
+    def __create_grpc_channel(endpoint: str) -> grpc.Channel:
+        channel: grpc.Channel = None
+        o = urlparse(endpoint)
+        if o.scheme == 'http':
+            # insecureなchannelを作成
+            channel = grpc.insecure_channel(o.netloc)
+        elif o.scheme == 'https':
+            # secureなchannelを作成
+            credential: grpc.ChannelCredentials \
+                = grpc.ssl_channel_credentials()
+            channel = grpc.secure_channel(o.netloc, credential)
+        else:
+            logger.error(f'仕様を満たさない形式のendpointが渡された: {endpoint}')
+            raise ArgmentError(
+                "endpointsにサポートされてないプロトコルが指定されています．http/httpsのいずれかを指定してください．")
+
+        return channel
+
+    @staticmethod
+    def __futures_result(futures: Iterable) -> Tuple[bool, List]:
+        """ エラーチェックしてfutureのresultを得る """
+        is_ok: bool = True
+        response: List = []
+        try:
+            response = [f.result() for f in futures]
+        except grpc.RpcError as e:
+            is_ok = False
+            logger.error(f'{e.details()} ({e.code()})')
+        except Exception as e:
+            is_ok = False
+            logger.error(e)
+
+        for b in response:
+            if hasattr(b, "is_ok"):
+                is_ok &= b.is_ok
+            else:
+                is_ok &= b["is_ok"]
+        return is_ok, response
+
+    @methoddispatch()
+    def send_share(self, _):
+        raise ArgmentError("不正な引数が与えられています．")
+
+    @send_share.register(Dim2)
+    @send_share.register(Dim3)
+    def __send_share_impl(self, secrets: List, schema: List[str],
+                          matching_column: int,
+                          party_size: int, piece_size: int) -> Dict:
+        """ Shareをコンテナに送信 """
+        sorted_secrets = sorted(
+            secrets, key=lambda row: row[matching_column-1])
+        # pieceに分けてシェア化
+        pieces: list = MakePiece.make_pieces(
+            sorted_secrets, int(piece_size / 10))
+        data_id: str = hashlib.sha256(
+            str(sorted_secrets).encode() + struct.pack('d', time.time())
+        ).hexdigest()
+        shares = [Share.sharize(s, party_size) for s in pieces]
+        sent_at = str(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+
+        # リクエストパラメータを設定して非同期にリクエスト送信
+        executor = ThreadPoolExecutor()
+        futures = [executor.submit(stub.SendShares,
+                                   SendSharesRequest(
+                                       data_id=data_id,
+                                       shares=json.dumps(s),
+                                       schema=schema,
+                                       piece_id=piece_id,
+                                       sent_at=sent_at,
+                                       token=self.token))
+                   for piece_id, share_piece in enumerate(shares)
+                   for stub, s in zip(self.__client_stubs, share_piece)
+                   ]
+        is_ok, _ = QMPCServer.__futures_result(futures)
+        return {"is_ok": is_ok, "data_id": data_id}
+
+    def delete_share(self, data_ids: List[str]) -> Dict:
+        """ Shareを削除 """
+        req = DeleteSharesRequest(dataIds=data_ids, token=self.token)
+        # 非同期にリクエスト送信
+        executor = ThreadPoolExecutor()
+        futures = [executor.submit(stub.DeleteShares, req)
+                   for stub in self.__client_stubs]
+        is_ok, _ = QMPCServer.__futures_result(futures)
+        return {"is_ok": is_ok}
+
+    def execute_computation(self, method_id: int,
+                            join_order: Tuple[List, List, List],
+                            inp: Tuple[List, List]) -> Dict:
+        """ 計算リクエストを送信 """
+        join_order_req = JoinOrder(
+            dataIds=join_order[0],
+            join=join_order[1],
+            index=join_order[2])
+        input_req = Input(
+            src=inp[0],
+            target=inp[1])
+        req = ExecuteComputationRequest(
+            method_id=method_id,
+            token=self.token,
+            table=join_order_req,
+            arg=input_req,
+        )
+
+        # 非同期にリクエスト送信
+        executor = ThreadPoolExecutor()
+        # JobidをMCから貰う関係で単一MC（現在はSP（ID=0）のみ対応）にリクエストを送る
+        futures = [executor.submit(
+            self.__client_stubs[0].ExecuteComputation, req)]
+
+        is_ok, response = QMPCServer.__futures_result(futures)
+        job_uuid = response[0].job_uuid if is_ok else None
+
+        return {"is_ok": is_ok, "job_uuid": job_uuid}
+
+    def get_computation_result(self, job_uuid: str) -> Dict:
+        """ コンテナから結果を取得 """
+        # リクエストパラメータを設定
+        req = GetComputationResultRequest(
+            job_uuid=job_uuid,
+            token=self.token
+        )
+        # 非同期にリクエスト送信
+        executor = ThreadPoolExecutor()
+        futures = [executor.submit(stub.GetComputationResult, req)
+                   for stub in self.__client_stubs]
+        is_ok, response = QMPCServer.__futures_result(futures)
+        statuses = [r.status for r in response] if is_ok else None
+        all_completed = all([
+            s == JobStatus.Value('COMPLETED') for s in statuses
+        ]) if statuses is not None else False
+        results = [eval(r.result) for r in response] if all_completed else None
+
+        # reconsして返す
+        results = if_present(results, Share.recons)
+        return {"is_ok": is_ok, "statuses": statuses, "results": results}
+
+    def send_model_params(self, params: list,
+                          party_size: int) -> Dict:
+        """ モデルパラメータをコンテナに送信 """
+        # リクエストパラメータを設定
+        job_uuid: str = str(uuid.uuid4())
+        params_share: list = Share.sharize(params, party_size)
+        reqs = [SendModelParamRequest(job_uuid=job_uuid,
+                                      params=json.dumps(param),
+                                      token=self.token)
+                for param in params_share]
+
+        # 非同期にリクエスト送信
+        executor = ThreadPoolExecutor()
+        futures = [executor.submit(stub.SendModelParam, req)
+                   for stub, req in zip(self.__client_stubs, reqs)]
+        is_ok, _ = QMPCServer.__futures_result(futures)
+
+        return {"is_ok": is_ok, "job_uuid": job_uuid}
+
+    def predict(self,
+                model_param_job_uuid: str,
+                model_id: int,
+                join_order: Tuple[List, List, List],
+                src: List[int]) -> Dict:
+        """ モデルから予測値を取得 """
+        # リクエストパラメータを設定
+        job_uuid: str = str(uuid.uuid4())
+        req = PredictRequest(job_uuid=job_uuid,
+                             model_param_job_uuid=model_param_job_uuid,
+                             model_id=model_id,
+                             table=JoinOrder(dataIds=join_order[0],
+                                             join=join_order[1],
+                                             index=join_order[2]),
+                             src=src,
+                             token=self.token)
+
+        # 非同期にリクエスト送信
+        executor = ThreadPoolExecutor()
+        futures = [executor.submit(stub.Predict, req)
+                   for stub in self.__client_stubs]
+        is_ok, response = QMPCServer.__futures_result(futures)
+
+        return {"is_ok": is_ok, "job_uuid": job_uuid}
+
+    def get_data_list(self) -> Dict:
+        # 非同期にリクエスト送信
+        executor = ThreadPoolExecutor()
+        futures = [executor.submit(stub.GetDataList,
+                                   GetDataListRequest(token=self.token))
+                   for stub in self.__client_stubs]
+        is_ok, response = QMPCServer.__futures_result(futures)
+        results = [eval(r.result) for r in response] if is_ok else None
+
+        return {"is_ok": is_ok, "results": results}
