@@ -1,4 +1,5 @@
 import csv
+from hashlib import sha512
 from typing import List, Tuple
 
 import numpy as np
@@ -19,11 +20,18 @@ def format_check(secrets: List[List[float]],
 
 
 def to_float(val: str) -> float:
-    """ 数値に変換可能なら変換して返し，不可能なら数値を錬成する．"""
+    """ If val is a float, convert as is; if it is a string, hash it. """
     try:
         return float(val)
     except ValueError:
-        return float(int(val, 36))
+        # k,m are constants used in the comparison operation
+        # Due to the limitation of comparison operation, k bits are taken out and divided by 2^m.
+        k: int = 32
+        m: int = 16
+        hs: str = sha512(val.encode()).hexdigest()
+        val_int: int = int(hs[:(k >> 2)], 16)
+        val_float: float = val_int / pow(2, m)
+        return val_float
 
 
 def parse(data: List[List[str]]) \
