@@ -25,11 +25,13 @@ class QMPC:
     token: InitVar[str] = "token_demo"
 
     __qmpc_server: QMPCServer = field(init=False)
+    __party_size: int = field(init=False)
 
     def __post_init__(self, endpoints: List[str],
                       token: str):
         object.__setattr__(self, "_QMPC__qmpc_server", QMPCServer(
             endpoints, token))
+        object.__setattr__(self, "_QMPC__party_size", len(endpoints))
 
     def parse_csv_file(self, filename: str) \
             -> Tuple[List[List[float]], List[str]]:
@@ -51,9 +53,9 @@ class QMPC:
 
     def send_share(self, secrets: List, schema: List[str],
                    matching_column: int = 1,
-                   party_size: int = 3, piece_size: int = 1_000_000) -> Dict:
+                   piece_size: int = 1_000_000) -> Dict:
         return self.__qmpc_server.send_share(
-            secrets, schema, matching_column,  party_size, piece_size)
+            secrets, schema, matching_column, piece_size)
 
     def delete_share(self, data_ids: List[str]) -> Dict:
         return self.__qmpc_server.delete_share(data_ids)
@@ -114,10 +116,9 @@ class QMPC:
         return self.__qmpc_server.get_computation_result(job_id)
 
     def send_model_params(self, params: list,
-                          party_size: int = 3,
                           piece_size: int = 1_000_000) -> Dict:
         return self.__qmpc_server.send_model_params(
-            params, party_size, piece_size)
+            params, piece_size)
 
     def linear_regression_predict(self,
                                   model_param_job_uuid: str,
@@ -159,7 +160,6 @@ class QMPC:
             -> Dict:
         return self.__qmpc_server.get_data_list()
 
-    def demo_sharize(self, secrets: List,
-                     party_size: int = 3) -> Dict:
-        share = Share.sharize(secrets, party_size)
+    def demo_sharize(self, secrets: List) -> Dict:
+        share = Share.sharize(secrets, self.__party_size)
         return {'is_ok': True, 'results': share}
