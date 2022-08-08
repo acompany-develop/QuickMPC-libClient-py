@@ -25,7 +25,8 @@ def to_float(val: str) -> float:
         return float(val)
     except ValueError:
         # k,m are constants used in the comparison operation
-        # Due to the limitation of comparison operation, k bits are taken out and divided by 2^m.
+        # Due to the limitation of comparison operation,
+        # k bits are taken out and divided by 2^m.
         k: int = 32
         m: int = 16
         hs: str = sha512(val.encode()).hexdigest()
