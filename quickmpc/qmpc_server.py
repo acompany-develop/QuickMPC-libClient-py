@@ -17,9 +17,8 @@ from .proto.common_types.common_types_pb2 import JobStatus
 from .proto.libc_to_manage_pb2 import (DeleteSharesRequest,
                                        ExecuteComputationRequest,
                                        GetComputationResultRequest,
-                                       GetDataListRequest,
-                                       Input, JoinOrder, PredictRequest,
-                                       SendModelParamRequest,
+                                       GetDataListRequest, Input, JoinOrder,
+                                       PredictRequest, SendModelParamRequest,
                                        SendSharesRequest)
 from .proto.libc_to_manage_pb2_grpc import LibcToManageStub
 from .share import Share
@@ -37,12 +36,14 @@ logger = logging.getLogger(__name__)
 class QMPCServer:
     endpoints: InitVar[List[str]]
     __client_stubs: Tuple[LibcToManageStub] = field(init=False)
+    __party_size: int = field(init=False)
     token: str
 
     def __post_init__(self, endpoints: List[str]) -> None:
         stubs = [LibcToManageStub(QMPCServer.__create_grpc_channel(ep))
                  for ep in endpoints]
         object.__setattr__(self, "_QMPCServer__client_stubs", stubs)
+        object.__setattr__(self, "_QMPCServer__party_size", len(endpoints))
 
     @staticmethod
     def __create_grpc_channel(endpoint: str) -> grpc.Channel:
@@ -92,7 +93,7 @@ class QMPCServer:
     @send_share.register(Dim3)
     def __send_share_impl(self, secrets: List, schema: List[str],
                           matching_column: int,
-                          party_size: int, piece_size: int) -> Dict:
+                          piece_size: int) -> Dict:
         """ Shareをコンテナに送信 """
         sorted_secrets = sorted(
             secrets, key=lambda row: row[matching_column-1])
@@ -102,7 +103,7 @@ class QMPCServer:
         data_id: str = hashlib.sha256(
             str(sorted_secrets).encode() + struct.pack('d', time.time())
         ).hexdigest()
-        shares = [Share.sharize(s, party_size) for s in pieces]
+        shares = [Share.sharize(s, self.__party_size) for s in pieces]
         sent_at = str(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
         # リクエストパラメータを設定して非同期にリクエスト送信
@@ -182,12 +183,11 @@ class QMPCServer:
         results = if_present(results, Share.recons)
         return {"is_ok": is_ok, "statuses": statuses, "results": results}
 
-    def send_model_params(self, params: list,
-                          party_size: int) -> Dict:
+    def send_model_params(self, params: list) -> Dict:
         """ モデルパラメータをコンテナに送信 """
         # リクエストパラメータを設定
         job_uuid: str = str(uuid.uuid4())
-        params_share: list = Share.sharize(params, party_size)
+        params_share: list = Share.sharize(params, self.__party_size)
         reqs = [SendModelParamRequest(job_uuid=job_uuid,
                                       params=json.dumps(param),
                                       token=self.token)

@@ -19,7 +19,7 @@ class TestQMPC:
     def test_send_shares(self, secrets, run_server1, run_server2, run_server3):
         """ serverにシェアを送れるかのTest"""
         response: Dict[str, Any] = self.qmpc.send_share(
-            secrets, [], 1, 3, 1000)
+            secrets, [], 1, 1000)
         assert(response["is_ok"])
 
     def test_delete_shares(self, run_server1, run_server2, run_server3):
@@ -45,7 +45,7 @@ class TestQMPC:
     def test_send_model_params(self, run_server1, run_server2, run_server3):
         """ serverにモデルパラメータを送れるかのTest"""
         res: Dict[str, Any] = self.qmpc.send_model_params(
-            [[1, 2, 3]], 3)
+            [[1, 2, 3]])
         assert(res["is_ok"])
 
     def test_predict(self, run_server1, run_server2, run_server3):
