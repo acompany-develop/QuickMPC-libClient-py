@@ -20,7 +20,7 @@ def format_check(secrets: List[List[float]],
 
 
 def to_float(val: str) -> float:
-    """ If val is a float, convert as is; if it is a string, hash it. """
+    """ If val is a float, convert as is; if it is a string, unicode it. """
     try:
         return float(val)
     except ValueError:
