@@ -29,8 +29,8 @@ def to_float(val: str) -> float:
         # k bits are taken out and divided by 2^m.
         k: int = 32
         m: int = 16
-        hs: str = sha512(val.encode()).hexdigest()
-        val_int: int = int(hs[:(k >> 2)], 16)
+        val_bin: str = "".join(map(lambda x: bin(ord(x))[2:], val))
+        val_int: int = int(val_bin[:k], 2)
         val_float: float = val_int / pow(2, m)
         return val_float
 
