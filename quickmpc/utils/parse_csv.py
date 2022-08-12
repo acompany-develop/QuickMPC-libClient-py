@@ -1,5 +1,4 @@
 import csv
-from hashlib import sha512
 from typing import List, Tuple
 
 import numpy as np
