@@ -23,7 +23,7 @@ class TestQMPC:
         assert(actual == expected)
 
     @pytest.mark.parametrize(
-        ("string, size,expected"),
+        ("string, size, expected"),
         [
             # 空文字列
             ("", 1, []),
