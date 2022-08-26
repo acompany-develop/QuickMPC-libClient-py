@@ -115,8 +115,10 @@ class QMPC:
     def get_computation_result(self, job_id: str) -> Dict:
         return self.__qmpc_server.get_computation_result(job_id)
 
-    def send_model_params(self, params: list) -> Dict:
-        return self.__qmpc_server.send_model_params(params)
+    def send_model_params(self, params: list,
+                          piece_size: int = 1_000_000) -> Dict:
+        return self.__qmpc_server.send_model_params(
+            params, piece_size)
 
     def linear_regression_predict(self,
                                   model_param_job_uuid: str,

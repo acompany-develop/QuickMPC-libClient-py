@@ -85,6 +85,17 @@ class QMPCServer:
                 is_ok &= b["is_ok"]
         return is_ok, response
 
+    @staticmethod
+    def __stream_result(stream: Iterable) -> Dict:
+        """ エラーチェックしてstreamのresultを得る """
+        is_ok: bool = True
+        res_list = []
+        for res in stream:
+            is_ok &= res.is_ok
+            res_list.append(res)
+        res_dict: Dict = {"is_ok": is_ok, "responses": res_list}
+        return res_dict
+
     @methoddispatch()
     def send_share(self, _):
         raise ArgmentError("不正な引数が与えられています．")
@@ -170,33 +181,51 @@ class QMPCServer:
         )
         # 非同期にリクエスト送信
         executor = ThreadPoolExecutor()
-        futures = [executor.submit(stub.GetComputationResult, req)
+        futures = [executor.submit(QMPCServer.__stream_result,
+                                   stub.GetComputationResult(req))
                    for stub in self.__client_stubs]
         is_ok, response = QMPCServer.__futures_result(futures)
-        statuses = [r.status for r in response] if is_ok else None
+
+        results_sorted = [sorted(res["responses"], key=lambda r: r.piece_id)
+                          for res in response]
+
+        # NOTE: statusは0番目(piece_id=1)の要素にのみ含まれている
+        statuses = [res[0].status for res in results_sorted] \
+            if results_sorted else None
         all_completed = all([
             s == JobStatus.Value('COMPLETED') for s in statuses
         ]) if statuses is not None else False
-        results = [eval(r.result) for r in response] if all_completed else None
+
+        # piece_id順にresultを結合
+        results_str = ["".join(map(lambda r: r.result, res))
+                       for res in results_sorted]
+        results = [eval(eval(r))
+                   for r in results_str] if all_completed else None
 
         # reconsして返す
         results = if_present(results, Share.recons)
         return {"is_ok": is_ok, "statuses": statuses, "results": results}
 
-    def send_model_params(self, params: list) -> Dict:
+    def send_model_params(self, params: list,
+                          piece_size: int) -> Dict:
         """ モデルパラメータをコンテナに送信 """
         # リクエストパラメータを設定
         job_uuid: str = str(uuid.uuid4())
         params_share: list = Share.sharize(params, self.__party_size)
-        reqs = [SendModelParamRequest(job_uuid=job_uuid,
-                                      params=json.dumps(param),
-                                      token=self.token)
-                for param in params_share]
+
+        params_share_pieces: list = [MakePiece.make_pieces(
+            json.dumps(p), piece_size) for p in params_share]
 
         # 非同期にリクエスト送信
         executor = ThreadPoolExecutor()
-        futures = [executor.submit(stub.SendModelParam, req)
-                   for stub, req in zip(self.__client_stubs, reqs)]
+        futures = [executor.submit(stub.SendModelParam,
+                                   SendModelParamRequest(job_uuid=job_uuid,
+                                                         params=param,
+                                                         piece_id=piece_id+1,
+                                                         token=self.token))
+                   for pieces, stub in zip(params_share_pieces,
+                                           self.__client_stubs)
+                   for piece_id, param in enumerate(pieces)]
         is_ok, _ = QMPCServer.__futures_result(futures)
 
         return {"is_ok": is_ok, "job_uuid": job_uuid}

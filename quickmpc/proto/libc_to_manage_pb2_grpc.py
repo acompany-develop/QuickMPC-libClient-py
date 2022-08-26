@@ -36,7 +36,7 @@ class LibcToManageStub(object):
                 request_serializer=libc__to__manage__pb2.ExecuteComputationRequest.SerializeToString,
                 response_deserializer=libc__to__manage__pb2.ExecuteComputationResponse.FromString,
                 )
-        self.GetComputationResult = channel.unary_unary(
+        self.GetComputationResult = channel.unary_stream(
                 '/libctomanage.LibcToManage/GetComputationResult',
                 request_serializer=libc__to__manage__pb2.GetComputationResultRequest.SerializeToString,
                 response_deserializer=libc__to__manage__pb2.GetComputationResultResponse.FromString,
@@ -134,7 +134,7 @@ def add_LibcToManageServicer_to_server(servicer, server):
                     request_deserializer=libc__to__manage__pb2.ExecuteComputationRequest.FromString,
                     response_serializer=libc__to__manage__pb2.ExecuteComputationResponse.SerializeToString,
             ),
-            'GetComputationResult': grpc.unary_unary_rpc_method_handler(
+            'GetComputationResult': grpc.unary_stream_rpc_method_handler(
                     servicer.GetComputationResult,
                     request_deserializer=libc__to__manage__pb2.GetComputationResultRequest.FromString,
                     response_serializer=libc__to__manage__pb2.GetComputationResultResponse.SerializeToString,
@@ -245,7 +245,7 @@ class LibcToManage(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.unary_unary(request, target, '/libctomanage.LibcToManage/GetComputationResult',
+        return grpc.experimental.unary_stream(request, target, '/libctomanage.LibcToManage/GetComputationResult',
             libc__to__manage__pb2.GetComputationResultRequest.SerializeToString,
             libc__to__manage__pb2.GetComputationResultResponse.FromString,
             options, channel_credentials,
