@@ -2,9 +2,10 @@ name: Python CI
 
 on:
   pull_request:
+  push:
     branches:
-      - develop
-      - migration/**
+      - main
+      - "release/**"
 
 jobs:
   # 開発環境でsyntaxのチェック
