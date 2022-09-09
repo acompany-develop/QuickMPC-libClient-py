@@ -38,20 +38,30 @@ class QMPC:
 
     def parse_csv_file(self, filename: str) \
             -> Tuple[List[List[float]], List[str]]:
+        logger.info("parse_csv_file. "
+                    f"[filename]='{filename}'")
         return parse_csv(filename)
 
     def parse_csv_file_to_bitvector(self, filename: str,
                                     exclude: List[int] = []) \
             -> Tuple[List[List[float]], List[str]]:
+        logger.info("parse_csv_file_to_bitvector. "
+                    f"[filename]='{filename}' "
+                    f"[not bitvector columns]={exclude}")
         return parse_csv_to_bitvector(filename, exclude)
 
     def parse_csv_data(self, data: List[List[str]]) \
             -> Tuple[List[List[float]], List[str]]:
+        logger.info("parse_csv_data. "
+                    f"[data size]={len(data)}x{len(data[0])}")
         return parse(data)
 
     def parse_csv_data_to_bitvector(self, data: List[List[str]],
                                     exclude: List[int] = []) \
             -> Tuple[List[List[float]], List[str]]:
+        logger.info("parse_csv_file_to_bitvector. "
+                    f"[data size]={len(data)}x{len(data[0])} "
+                    f"[not bitvector columns]={exclude}")
         return parse_to_bitvector(data, exclude)
 
     def send_share(self, secrets: List, schema: List[str],
