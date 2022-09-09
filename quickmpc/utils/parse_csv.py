@@ -11,15 +11,15 @@ def format_check(secrets: List[List[float]],
                  schema: List[str]) -> bool:
     # 存在チェック
     if not (schema and secrets):
-        logger.critical("Schema or secrets table are not exists.")
+        logger.error("Schema or secrets table are not exists.")
         return False
     # 重複チェック
     if len(schema) != len(set(schema)):
-        logger.critical("Duplicate schema name.")
+        logger.error("Duplicate schema name.")
         return False
     # サイズチェック
     if np.any([len(s) != len(schema) for s in secrets]):
-        logger.critical("schema size and table colummn size are different.")
+        logger.error("schema size and table colummn size are different.")
         return False
     return True
 

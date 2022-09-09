@@ -18,13 +18,13 @@ class Share:
     @methoddispatch(is_static_method=True)
     @staticmethod
     def sharize(_, __):
-        logger.critical("Invalid argument on sharize.")
+        logger.error("Invalid argument on sharize.")
         raise ArgmentError("不正な引数が与えられています．")
 
     @methoddispatch(is_static_method=True)
     @staticmethod
     def recons(_):
-        logger.critical("Invalid argument on recons.")
+        logger.error("Invalid argument on recons.")
         raise ArgmentError("不正な引数が与えられています．")
 
     @sharize.register(int)
