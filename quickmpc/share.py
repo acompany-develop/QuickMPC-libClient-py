@@ -8,7 +8,7 @@ from .utils.overload_tools import (ArgmentError, DictList, DictList2,
                                    Dim1, Dim2, Dim3, methoddispatch)
 from .utils.random import ChaCha20, RandomInterface
 
-logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
