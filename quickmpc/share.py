@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass
 from typing import ClassVar, List, Tuple
 
@@ -7,6 +8,8 @@ from .utils.overload_tools import (ArgmentError, DictList, DictList2,
                                    Dim1, Dim2, Dim3, methoddispatch)
 from .utils.random import ChaCha20, RandomInterface
 
+logger = logging.getLogger(__name__)
+
 
 @dataclass(frozen=True)
 class Share:
@@ -15,12 +18,13 @@ class Share:
     @methoddispatch(is_static_method=True)
     @staticmethod
     def sharize(_, __):
+        logger.error("Invalid argument on sharize.")
         raise ArgmentError("不正な引数が与えられています．")
 
     @methoddispatch(is_static_method=True)
     @staticmethod
     def recons(_):
-        print("ERROR:", _)
+        logger.error("Invalid argument on recons.")
         raise ArgmentError("不正な引数が与えられています．")
 
     @sharize.register(int)
