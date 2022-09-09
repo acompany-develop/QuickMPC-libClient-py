@@ -12,7 +12,7 @@ from typing import Dict, Iterable, List, Tuple
 from urllib.parse import urlparse
 
 import grpc
-import tqdm
+import tqdm  # type: ignore
 
 from .proto.common_types.common_types_pb2 import JobStatus
 from .proto.libc_to_manage_pb2 import (DeleteSharesRequest,
