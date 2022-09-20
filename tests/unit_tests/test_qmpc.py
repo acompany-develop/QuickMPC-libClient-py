@@ -20,12 +20,12 @@ class TestQMPC:
         """ serverにシェアを送れるかのTest"""
         response: Dict[str, Any] = self.qmpc.send_share(
             secrets, [], 1, 1000)
-        assert(response["is_ok"])
+        assert (response["is_ok"])
 
     def test_delete_shares(self, run_server1, run_server2, run_server3):
         """ serverにシェア削除要求を送れるかのTest"""
         response: Dict[str, Any] = self.qmpc.delete_share([])
-        assert(response["is_ok"])
+        assert (response["is_ok"])
 
     def test_execute_computation(self, run_server1, run_server2, run_server3):
         """ serverに計算リクエストを送れるかのTest"""
@@ -33,20 +33,20 @@ class TestQMPC:
             response: Dict[str, Any] = self.qmpc.execute_computation(
                 method_id,
                 [["id1", "id2"], [0], [1, 1]], [[0, 1], []])
-            assert(response["is_ok"])
+            assert (response["is_ok"])
 
     def test_get_computation_resultRequest(self, run_server1,
                                            run_server2, run_server3):
         """ serverから結果を得られるかのTest """
         job_uuid: str = "uuid"
         response: Dict[str, Any] = self.qmpc.get_computation_result(job_uuid)
-        assert(response["is_ok"])
+        assert (response["is_ok"])
 
     def test_send_model_params(self, run_server1, run_server2, run_server3):
         """ serverにモデルパラメータを送れるかのTest"""
         res: Dict[str, Any] = self.qmpc.send_model_params(
             [[1, 2, 3]], 1000)
-        assert(res["is_ok"])
+        assert (res["is_ok"])
 
     def test_predict(self, run_server1, run_server2, run_server3):
         """ serverにモデル値予測リクエストを送れるかのTest """
@@ -55,9 +55,9 @@ class TestQMPC:
         response: Dict[str, Any] = self.qmpc.predict(
             model_param_job_uuid, model_id,
             [["id1", "id2"], [0], [1, 1]], [0, 1])
-        assert(response["is_ok"])
+        assert (response["is_ok"])
 
     def test_get_data_list(self, run_server1, run_server2, run_server3):
         """ serverにシェアを送れるかのTest"""
         response: Dict[str, Any] = self.qmpc.get_data_list()
-        assert(response["is_ok"])
+        assert (response["is_ok"])

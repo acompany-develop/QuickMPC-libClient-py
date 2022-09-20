@@ -3,7 +3,7 @@ import operator
 from dataclasses import dataclass
 from typing import List
 
-from.overload_tools import ArgmentError, Dim1, Dim2, methoddispatch
+from .overload_tools import ArgmentError, Dim1, Dim2, methoddispatch
 
 
 @dataclass(frozen=True)

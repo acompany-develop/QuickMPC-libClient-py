@@ -22,17 +22,17 @@ class TestCsprng:
         exist_upper_1: bool = False
         for _ in range(1000):
             x: int = self.rnd.get(lower, upper)
-            assert(lower <= x and x < upper)
-            assert(type(x) is int)
+            assert (lower <= x and x < upper)
+            assert (type(x) is int)
             exist_lower |= (x == lower)
             exist_upper_1 |= (x == upper-1)
         for x in self.rnd.get_list(lower, upper, 1000):
-            assert(lower <= x and x < upper)
-            assert(type(x) is int)
+            assert (lower <= x and x < upper)
+            assert (type(x) is int)
             exist_lower |= (x == lower)
             exist_upper_1 |= (x == upper-1)
-        assert(exist_lower)
-        assert(exist_upper_1)
+        assert (exist_lower)
+        assert (exist_upper_1)
 
     @pytest.mark.parametrize(
         ("lower", "upper"),
@@ -47,11 +47,11 @@ class TestCsprng:
         """ 半開区間内で生成されるかのtest """
         for _ in range(1000):
             x: int = self.rnd.get(lower, upper)
-            assert(lower <= x and x < upper)
-            assert(type(x) is float)
+            assert (lower <= x and x < upper)
+            assert (type(x) is float)
         for x in self.rnd.get_list(lower, upper, 1000):
-            assert(lower <= x and x < upper)
-            assert(type(x) is float)
+            assert (lower <= x and x < upper)
+            assert (type(x) is float)
 
     @pytest.mark.parametrize(
         ("lower", "upper"),
