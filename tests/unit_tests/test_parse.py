@@ -49,15 +49,15 @@ d2_secrets: List[List[float]] = [
 def test_parse():
     """ 正しくパースできるかTest """
     secrets, schema = parse(data1)
-    assert(np.allclose(secrets, d1_secrets))
-    assert(schema == d1_schema)
+    assert (np.allclose(secrets, d1_secrets))
+    assert (schema == d1_schema)
 
 
 def test_parse_to_bitvector():
     """ 正しくパースできるかTest """
     secrets, schema = parse_to_bitvector(data2, [0])
-    assert(np.allclose(secrets, d2_secrets))
-    assert(schema == d2_schema)
+    assert (np.allclose(secrets, d2_secrets))
+    assert (schema == d2_schema)
 
 
 def test_parse_errorhandring():
@@ -84,16 +84,16 @@ def test_parse_csv():
     """ csvを正しくパースできるかTest """
     secrets, schema = parse_csv(
         f"{os.path.dirname(__file__)}/test_files/data1.csv")
-    assert(np.allclose(secrets, d1_secrets))
-    assert(schema == d1_schema)
+    assert (np.allclose(secrets, d1_secrets))
+    assert (schema == d1_schema)
 
 
 def test_parse_csv_to_bitvector():
     """ csvを正しくパースできるかTest """
     secrets, schema = parse_csv_to_bitvector(
         f"{os.path.dirname(__file__)}/test_files/data3.csv", [0])
-    assert(np.allclose(secrets, d2_secrets))
-    assert(schema == d2_schema)
+    assert (np.allclose(secrets, d2_secrets))
+    assert (schema == d2_schema)
 
 
 def test_parse_csv_errorhandring():

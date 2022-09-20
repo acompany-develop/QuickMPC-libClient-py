@@ -27,11 +27,11 @@ def test_overload():
             return 4
 
     d: Class = Class()
-    assert(d.method({}) == 0)
-    assert(d.method(0) == 1)
-    assert(d.method(0.0) == 2)
-    assert(d.method("0") == 3)
-    assert(d.method([0]) == 4)
+    assert (d.method({}) == 0)
+    assert (d.method(0) == 1)
+    assert (d.method(0.0) == 2)
+    assert (d.method("0") == 3)
+    assert (d.method([0]) == 4)
 
 
 def test_overload_static():
@@ -62,11 +62,11 @@ def test_overload_static():
         def method4(val):
             return 4
 
-    assert(Class.method({}) == 0)
-    assert(Class.method(0) == 1)
-    assert(Class.method(0.0) == 2)
-    assert(Class.method("0") == 3)
-    assert(Class.method([0]) == 4)
+    assert (Class.method({}) == 0)
+    assert (Class.method(0) == 1)
+    assert (Class.method(0.0) == 2)
+    assert (Class.method("0") == 3)
+    assert (Class.method([0]) == 4)
 
 
 def test_overload_dim():
@@ -102,11 +102,11 @@ def test_overload_dim():
             return 6
 
     d: Class = Class()
-    assert(d.method({}) == 0)
-    assert(d.method(0) == 1)
-    assert(d.method([0]) == 2)
-    assert(d.method([[0]]) == 3)
-    assert(d.method([[[0]]]) == 4)
-    assert(d.method([{}]) == 5)
-    assert(d.method([[{}]]) == 6)
-    assert(d.method([[[[0]]]]) == 0)
+    assert (d.method({}) == 0)
+    assert (d.method(0) == 1)
+    assert (d.method([0]) == 2)
+    assert (d.method([[0]]) == 3)
+    assert (d.method([[[0]]]) == 4)
+    assert (d.method([{}]) == 5)
+    assert (d.method([[{}]]) == 6)
+    assert (d.method([[[[0]]]]) == 0)

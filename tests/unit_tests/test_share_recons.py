@@ -28,7 +28,7 @@ class TestQMPC:
         """ 3パーティの復元が正しくできるかTest """
         secrets: list = Share.recons(shares)
         shares_float: np.ndarray = np.vectorize(float)(Share.sharize(secrets))
-        assert(np.allclose(secrets, np.sum(shares_float, axis=0)))
+        assert (np.allclose(secrets, np.sum(shares_float, axis=0)))
 
     @pytest.mark.parametrize(
         ("shares", "secrets_true"),
@@ -71,7 +71,7 @@ class TestQMPC:
                 ok &= math.isclose(val, true_val)
             return ok
 
-        assert(isclose(secrets, secrets_true))
+        assert (isclose(secrets, secrets_true))
 
     @pytest.mark.parametrize(
         ("shares"),
@@ -93,7 +93,7 @@ class TestQMPC:
         """ nパーティのシェアの復元が正しくできるかTest """
         secrets: list = Share.recons(shares)
         shares_float: np.ndarray = np.vectorize(float)(Share.sharize(secrets))
-        assert(np.allclose(secrets, np.sum(shares_float, axis=0)))
+        assert (np.allclose(secrets, np.sum(shares_float, axis=0)))
 
     def test_recons_errorhandring(self):
         """ 異常値を与えてエラーが出るかTest """
@@ -121,7 +121,7 @@ class TestQMPC:
         for party_size in range(2, 10):
             shares: list = Share.sharize(secrets, party_size=party_size)
             secrets_2: list = Share.recons(shares)
-            assert(np.allclose(secrets, secrets_2))
+            assert (np.allclose(secrets, secrets_2))
 
     @pytest.mark.parametrize(
         ("shares"),
@@ -134,4 +134,4 @@ class TestQMPC:
     def test_sharize_recons_not_share(self, shares: list):
         """ 数値でない(Shareでない)値を復元せず返却できるかTest """
         secrets: list = Share.recons(shares)
-        assert(shares[0] == secrets)
+        assert (shares[0] == secrets)

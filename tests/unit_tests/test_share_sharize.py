@@ -27,8 +27,8 @@ class TestQMPC:
         for party_size in range(2, 10):
             shares: np.ndarray = np.vectorize(float)(
                 Share.sharize(secrets, party_size=party_size))
-            assert(len(shares) == party_size)
-            assert(np.allclose(secrets, np.sum(shares, axis=0)))
+            assert (len(shares) == party_size)
+            assert (np.allclose(secrets, np.sum(shares, axis=0)))
 
     @pytest.mark.parametrize(
         ("secrets"),
@@ -39,8 +39,8 @@ class TestQMPC:
         for party_size in range(2, 10):
             shares: np.ndarray = np.vectorize(float)(
                 Share.sharize(secrets, party_size=party_size))
-            assert(len(shares) == party_size)
-            assert(np.sum(shares) == pytest.approx(secrets))
+            assert (len(shares) == party_size)
+            assert (np.sum(shares) == pytest.approx(secrets))
 
     @pytest.mark.parametrize(
         ("secrets"),
@@ -75,7 +75,7 @@ class TestQMPC:
                         share_map[key] = 0
                     share_map[key] += float(val)
             for key, _ in dfs(share).items():
-                assert(math.isclose(share_map[key], true_map[key]))
+                assert (math.isclose(share_map[key], true_map[key]))
 
     def test_sharize_errorhandring(self):
         """ 異常値を与えてエラーが出るかTest """
