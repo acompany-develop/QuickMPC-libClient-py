@@ -7,6 +7,7 @@ name = "pypi"
 numpy = "*"
 grpcio-tools = "==1.46.3"
 pynacl = "*"
+tqdm = "*"
 
 [dev-packages]
 pytest = "*"
