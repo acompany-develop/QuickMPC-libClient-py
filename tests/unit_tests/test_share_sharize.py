@@ -55,13 +55,13 @@ class TestQMPC:
         """ nパーティのjsonのシェア化が正しくできているかのTest """
         def dfs(val, key=""):
             dc: dict = dict()
-            if type(val) == list:
+            if isinstance(val, list):
                 for v in val:
                     dc = {**dc, **dfs(v, key)}
                 return dc
-            if type(val) == dict:
+            if isinstance(val, dict):
                 for k, v in val.items():
-                    dc = {**dc, **dfs(v, key+k)}
+                    dc = {**dc, **dfs(v, key + k)}
                 return dc
             return {**dc, **{key: val}}
         true_map: dict = dfs(secrets)
