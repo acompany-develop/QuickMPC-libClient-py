@@ -12,6 +12,7 @@ from typing import Dict, Iterable, List, Tuple
 from urllib.parse import urlparse
 
 import grpc
+import tqdm  # type: ignore
 
 from .proto.common_types.common_types_pb2 import JobStatus
 from .proto.libc_to_manage_pb2 import (DeleteSharesRequest,
@@ -65,11 +66,14 @@ class QMPCServer:
         return channel
 
     @staticmethod
-    def __futures_result(futures: Iterable) -> Tuple[bool, List]:
+    def __futures_result(
+            futures: Iterable, enable_progress_bar=True) -> Tuple[bool, List]:
         """ エラーチェックしてfutureのresultを得る """
         is_ok: bool = True
         response: List = []
         try:
+            if enable_progress_bar:
+                futures = tqdm.tqdm(futures, desc='receive')
             response = [f.result() for f in futures]
         except grpc.RpcError as e:
             is_ok = False
@@ -107,14 +111,15 @@ class QMPCServer:
                           piece_size: int) -> Dict:
         """ Shareをコンテナに送信 """
         sorted_secrets = sorted(
-            secrets, key=lambda row: row[matching_column-1])
+            secrets, key=lambda row: row[matching_column - 1])
         # pieceに分けてシェア化
         pieces: list = MakePiece.make_pieces(
             sorted_secrets, int(piece_size / 10))
         data_id: str = hashlib.sha256(
             str(sorted_secrets).encode() + struct.pack('d', time.time())
         ).hexdigest()
-        shares = [Share.sharize(s, self.__party_size) for s in pieces]
+        shares = [Share.sharize(s, self.__party_size)
+                  for s in tqdm.tqdm(pieces, desc='sharize')]
         sent_at = str(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
         # リクエストパラメータを設定して非同期にリクエスト送信
@@ -184,7 +189,8 @@ class QMPCServer:
         futures = [executor.submit(QMPCServer.__stream_result,
                                    stub.GetComputationResult(req))
                    for stub in self.__client_stubs]
-        is_ok, response = QMPCServer.__futures_result(futures)
+        is_ok, response = QMPCServer.__futures_result(
+            futures, enable_progress_bar=False)
 
         results_sorted = [sorted(res["responses"], key=lambda r: r.piece_id)
                           for res in response]
@@ -221,7 +227,7 @@ class QMPCServer:
         futures = [executor.submit(stub.SendModelParam,
                                    SendModelParamRequest(job_uuid=job_uuid,
                                                          params=param,
-                                                         piece_id=piece_id+1,
+                                                         piece_id=piece_id + 1,
                                                          token=self.token))
                    for pieces, stub in zip(params_share_pieces,
                                            self.__client_stubs)

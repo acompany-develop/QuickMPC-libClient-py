@@ -61,10 +61,10 @@ class TestQMPC:
 
         def isclose(val, true_val):
             ok: bool = True
-            if type(val) == list:
+            if isinstance(val, list):
                 for v, t in zip(val, true_val):
                     ok &= isclose(v, t)
-            elif type(val) == dict:
+            elif isinstance(val, dict):
                 for v, t in zip(val.values(), true_val.values()):
                     ok &= isclose(v, t)
             else:

@@ -1,4 +1,5 @@
 import pytest
+
 from quickmpc.utils.random import ChaCha20, RandomInterface
 
 
@@ -12,8 +13,8 @@ class TestCsprng:
             (-5, 5),  # 正負
             (-10, 0),  # 負のみ
             (0, 1),   # 範囲が1
-            (-(1 << 63), -(1 << 63)+1),  # 64bit最小値
-            ((1 << 63)-1, (1 << 63)+1)  # 64bit最大値
+            (-(1 << 63), -(1 << 63) + 1),  # 64bit最小値
+            ((1 << 63) - 1, (1 << 63) + 1)  # 64bit最大値
         ]
     )
     def test_csprng_int_interval(self, lower: int, upper: int):
@@ -23,14 +24,14 @@ class TestCsprng:
         for _ in range(1000):
             x: int = self.rnd.get(lower, upper)
             assert (lower <= x and x < upper)
-            assert (type(x) is int)
+            assert (isinstance(x, int))
             exist_lower |= (x == lower)
-            exist_upper_1 |= (x == upper-1)
+            exist_upper_1 |= (x == upper - 1)
         for x in self.rnd.get_list(lower, upper, 1000):
             assert (lower <= x and x < upper)
-            assert (type(x) is int)
+            assert (isinstance(x, int))
             exist_lower |= (x == lower)
-            exist_upper_1 |= (x == upper-1)
+            exist_upper_1 |= (x == upper - 1)
         assert (exist_lower)
         assert (exist_upper_1)
 
@@ -48,10 +49,10 @@ class TestCsprng:
         for _ in range(1000):
             x: int = self.rnd.get(lower, upper)
             assert (lower <= x and x < upper)
-            assert (type(x) is float)
+            assert (isinstance(x, float))
         for x in self.rnd.get_list(lower, upper, 1000):
             assert (lower <= x and x < upper)
-            assert (type(x) is float)
+            assert (isinstance(x, float))
 
     @pytest.mark.parametrize(
         ("lower", "upper"),
