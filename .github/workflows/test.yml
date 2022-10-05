@@ -37,18 +37,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [py37, py38, py39]
+        version: [
+          {python: 3.7, tox: py37},
+          {python: 3.8, tox: py38},
+          {python: 3.9, tox: py39}
+        ]
 
     steps:
     - uses: actions/checkout@v2
 
-    - name: Set up Python
+    - name: Set up Python ${{ matrix.version.python }}
       uses: actions/setup-python@v2
       with:
-        python-version: 3.7
+        python-version: ${{ matrix.version.python }}
 
     - name: Install dependencies
       run: pip install tox
 
     - name: Test with pytest
-      run: tox -e ${{ matrix.python-version }}
+      run: tox -e ${{ matrix.version.tox }}
