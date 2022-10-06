@@ -21,13 +21,17 @@ jobs:
         python-version: 3.7
 
     - name: Install dependencies
-      run: pip install tox
+      run: |
+        pip install tox
+        tox -e flake8,mypy --notest
 
     - name: Lint with flake8
-      run: tox -e flake8
+      run: |
+        tox -e flake8 --skip-pkg-install
 
     - name: Lint with mypy
-      run: tox -e mypy
+      run: |
+        tox -e mypy --skip-pkg-install
 
   # UnitTest
   unit_tests:
@@ -52,7 +56,10 @@ jobs:
         python-version: ${{ matrix.version.python }}
 
     - name: Install dependencies
-      run: pip install tox
+      run: |
+        pip install tox
+        tox -e ${{ matrix.version.tox }} --notest
 
     - name: Test with pytest
-      run: tox -e ${{ matrix.version.tox }}
+      run: |
+        tox -e ${{ matrix.version.tox }} --skip-pkg-install
