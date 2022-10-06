@@ -16,7 +16,7 @@ Testing and syntax checking will be performed on Python 3.7, 3.8, and 3.9.
 
 ### Testing with Python 3.7
 ```console
-$ pipenv run pytest tests
+$ pipenv run tox -e py37
 ```
 
 ## Demo

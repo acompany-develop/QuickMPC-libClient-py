@@ -20,7 +20,7 @@ Python3.7，3.8，3.9でのテスト，構文チェックが行われる．
 
 ### Python3.7のテスト
 ```console
-$ pipenv run pytest tests
+$ pipenv run tox -e py37
 ```
 
 ## Demo
