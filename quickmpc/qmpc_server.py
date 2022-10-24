@@ -202,6 +202,9 @@ class QMPCServer:
             s == JobStatus.Value('COMPLETED') for s in statuses
         ]) if statuses is not None else False
 
+        progresses = [res[0].progress if res[0].HasField("progress") else None for res in results_sorted] \
+            if results_sorted else None
+
         # piece_id順にresultを結合
         results_str = ["".join(map(lambda r: r.result, res))
                        for res in results_sorted]
@@ -210,7 +213,8 @@ class QMPCServer:
 
         # reconsして返す
         results = if_present(results, Share.recons)
-        return {"is_ok": is_ok, "statuses": statuses, "results": results}
+        return {"is_ok": is_ok, "statuses": statuses,
+                "results": results, "progresses": progresses}
 
     def send_model_params(self, params: list,
                           piece_size: int) -> Dict:
