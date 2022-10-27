@@ -35,22 +35,16 @@ def large_data(size: int, data_num: int):
     return qmpc.parse_csv_data([schema] + data)
 
 
-def get_data_id():
-    val: dict = {}
+def get_data_id(size: int, data_num):
+    """ Step 2. 送信用データの生成 """
+    secrets, schema = large_data(size, data_num)
 
-    def get(size: int, data_num):
-        if (size, data_num) in val:
-            return val[(size, data_num)]
+    """ Step 3. シェアをコンテナに送信 """
+    res = qmpc.send_share(secrets, schema)
+    assert (res["is_ok"])
+    data_id: str = res["data_id"]
 
-        """ Step 2. 送信用データの生成 """
-        secrets, schema = large_data(size, data_num)
-        """ Step 3. シェアをコンテナに送信 """
-        res = qmpc.send_share(secrets, schema)
-        assert (res["is_ok"])
-        data_id: str = res["data_id"]
-        val[(size, data_num)] = (data_id, secrets, schema)
-        return val[(size, data_num)]
-    return lambda size, data_num=1: get(size, data_num)
+    return (data_id, secrets, schema)
 
 
 if __name__ == '__main__':
@@ -64,8 +58,8 @@ if __name__ == '__main__':
     )
     # データ Setting
     size = 50000
-    data_id1, secrets1, schema1 = get_data_id()(size, data_num=1)
-    data_id2, secrets2, schema2 = get_data_id()(size, data_num=2)
+    data_id1, secrets1, schema1 = get_data_id(size, data_num=1)
+    data_id2, secrets2, schema2 = get_data_id(size, data_num=2)
 
     """ Step 4. テーブル横結合をリクエスト"""
     table = ([data_id1, data_id2], [2], [1, 1])
