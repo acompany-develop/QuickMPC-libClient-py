@@ -1,9 +1,10 @@
-""" QuickMPCによる演算の動作デモ
+""" QuickMPCからのレスポンスに含まれる計算処理の進捗を表示するデモ
 本デモコードは次の操作を行っている．
 Step 1. QuickMPC動作のための準備
-Step 2. シェアをコンテナに送信
-Step 3. 計算リクエストを送信
-Step 4. シェアを元に復元された演算結果の真値を取得
+Step 2. 送信用データの生成
+Step 3. シェアをコンテナに送信
+Step 4. 計算リクエストを送信
+Step 5. レスポンスからプログレスバーを作成・更新
 """
 
 import logging
@@ -40,7 +41,10 @@ def get_data_id():
     def get(size: int, data_num):
         if (size, data_num) in val:
             return val[(size, data_num)]
+
+        """ Step 2. 送信用データの生成 """
         secrets, schema = large_data(size, data_num)
+        """ Step 3. シェアをコンテナに送信 """
         res = qmpc.send_share(secrets, schema)
         assert (res["is_ok"])
         data_id: str = res["data_id"]
@@ -63,6 +67,7 @@ if __name__ == '__main__':
     data_id1, secrets1, schema1 = get_data_id()(size, data_num=1)
     data_id2, secrets2, schema2 = get_data_id()(size, data_num=2)
 
+    """ Step 4. テーブル横結合をリクエスト"""
     table = ([data_id1, data_id2], [2], [1, 1])
     exec_res = qmpc.get_join_table(table)
 
@@ -78,6 +83,7 @@ if __name__ == '__main__':
     while True:
         get_res = qmpc.get_computation_result(job_uuid)
 
+        """ Step 5. プログレスバーの作成・更新 """
         if get_res['statuses'] is not None:
             for party_id, status in enumerate(get_res['statuses']):
                 key = (party_id, -1)
