@@ -10,7 +10,7 @@ Step 5. レスポンスからプログレスバーを作成・更新
 import logging
 import time
 import collections
-from typing import List, Tuple, OrderedDict
+from typing import List, Tuple, OrderedDict, Optional
 
 import tqdm
 
@@ -69,7 +69,8 @@ if __name__ == '__main__':
     logger.info(f"job_uuid: {job_uuid}")
 
     pbars: OrderedDict[Tuple[int, int],
-                       Tuple[tqdm.tqdm, float]] = collections.OrderedDict()
+                       Tuple[Optional[tqdm.tqdm], float]] \
+        = collections.OrderedDict()
 
     QMPC.set_log_level(logging.WARN)
 
@@ -87,10 +88,18 @@ if __name__ == '__main__':
                         total=len(JobStatus.items()) - 1), 0)
 
                 pbar, prev = pbars[key]
+                if pbar is None:
+                    continue
+
                 pbar.update(status - prev)
                 pbar.set_postfix(
                     status=JobStatus.Name(status)
                 )
+
+                if status == JobStatus.Value('COMPLETED'):
+                    pbar.close()
+                    pbar = None
+
                 pbars[key] = (pbar, status)
 
         progresses = get_res['progresses']
@@ -108,8 +117,16 @@ if __name__ == '__main__':
                             total=100), 0)
 
                     pbar, prev = pbars[key]
+                    if pbar is None:
+                        continue
+
                     pbar.update(procedure.progress - prev)
                     pbar.set_postfix(details=procedure.details)
+
+                    if procedure.completed:
+                        pbar.close()
+                        pbar = None
+
                     pbars[key] = (pbar, procedure.progress)
 
         if get_res["results"] is not None:
