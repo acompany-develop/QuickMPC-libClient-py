@@ -68,7 +68,6 @@ if __name__ == '__main__':
     job_uuid = exec_res["job_uuid"]
     logger.info(f"job_uuid: {job_uuid}")
 
-    tqdm_pos = 0
     pbars: OrderedDict[Tuple[int, int],
                        Tuple[tqdm.tqdm, float]] = collections.OrderedDict()
 
@@ -85,9 +84,7 @@ if __name__ == '__main__':
                 if key not in pbars:
                     pbars[(party_id, -1)] = (tqdm.tqdm(
                         desc=f"[{party_id}] status",
-                        total=len(JobStatus.items()) - 1,
-                        position=tqdm_pos), 0)
-                    tqdm_pos += 1
+                        total=len(JobStatus.items()) - 1), 0)
 
                 pbar, prev = pbars[key]
                 pbar.update(status - prev)
@@ -108,9 +105,7 @@ if __name__ == '__main__':
                     if key not in pbars:
                         pbars[key] = (tqdm.tqdm(
                             desc=f"[{party_id}] {procedure.description}",
-                            total=100,
-                            position=tqdm_pos), 0)
-                        tqdm_pos += 1
+                            total=100), 0)
 
                     pbar, prev = pbars[key]
                     pbar.update(procedure.progress - prev)
