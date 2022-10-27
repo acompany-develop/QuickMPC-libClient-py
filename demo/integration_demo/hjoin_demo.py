@@ -8,14 +8,12 @@ Step 4. シェアを元に復元された演算結果の真値を取得
 
 import logging
 import time
-from typing import Callable, List, Tuple
+import collections
+from typing import List, Tuple, OrderedDict
 
-from utils import make_statuses_detailed
+import tqdm
 
-from google.protobuf import json_format
-import tabulate
-
-from quickmpc import QMPC
+from quickmpc import QMPC, JobStatus
 
 logger = logging.getLogger(__name__)
 formatter = ("%(levelname)-5s | %(message)s")
@@ -71,18 +69,53 @@ if __name__ == '__main__':
     job_uuid = exec_res["job_uuid"]
     logger.info(f"job_uuid: {job_uuid}")
 
+    tqdm_pos = 0
+    pbars: OrderedDict[Tuple[int, int],
+                       Tuple[tqdm.tqdm, float]] = collections.OrderedDict()
+
+    QMPC.set_log_level(logging.WARN)
+
     while True:
-        # 計算が終わるか100秒(1秒x100回)経つまで繰り返す
         get_res = qmpc.get_computation_result(job_uuid)
 
-        statuses = make_statuses_detailed(get_res['statuses'])
-        logger.info(f"statuses: {statuses}")
+        if get_res['statuses'] is not None:
+            for party_id, status in enumerate(get_res['statuses']):
+                key = (party_id, -1)
+
+                if key not in pbars:
+                    pbars[(party_id, -1)] = (tqdm.tqdm(
+                        desc=f"[{party_id}] status",
+                        total=len(JobStatus.items()) - 1,
+                        position=tqdm_pos), 0)
+                    tqdm_pos += 1
+
+                pbar, prev = pbars[key]
+                pbar.update(status - prev)
+                pbar.set_postfix(
+                    status=JobStatus.Name(status)
+                )
+                pbars[key] = (pbar, status)
+
         progresses = get_res['progresses']
-        print('---- >8 ----')
         if progresses is not None:
-            progresses = [json_format.MessageToDict(p) for p in progresses]
-            print(tabulate.tabulate(progresses))
-        print('------------')
+            for party_id, progress in enumerate(progresses):
+                if progress is None:
+                    continue
+
+                for procedure in progress.progresses:
+                    key = (party_id, procedure.id)
+
+                    if key not in pbars:
+                        pbars[key] = (tqdm.tqdm(
+                            desc=f"[{party_id}] {procedure.description}",
+                            total=100,
+                            position=tqdm_pos), 0)
+                        tqdm_pos += 1
+
+                    pbar, prev = pbars[key]
+                    pbar.update(procedure.progress - prev)
+                    pbar.set_postfix(details=procedure.details)
+                    pbars[key] = (pbar, procedure.progress)
 
         if get_res["results"] is not None:
             break
