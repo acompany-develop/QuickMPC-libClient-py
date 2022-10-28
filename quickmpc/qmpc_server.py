@@ -202,8 +202,12 @@ class QMPCServer:
             s == JobStatus.Value('COMPLETED') for s in statuses
         ]) if statuses is not None else False
 
-        progresses = [res[0].progress if res[0].HasField("progress") else None for res in results_sorted] \
-            if results_sorted else None
+        progresses = None
+        if results_sorted is not None:
+            progresses = [
+                res[0].progress if res[0].HasField("progress") else None
+                for res in results_sorted
+            ]
 
         # piece_id順にresultを結合
         results_str = ["".join(map(lambda r: r.result, res))
