@@ -256,3 +256,8 @@ class QMPC:
                     f"[secrets size]={len(secrets)}x{len(secrets[0])}")
         share = Share.sharize(secrets, self.__party_size)
         return {'is_ok': True, 'results': share}
+
+    def get_elapsed_time(self, job_id: str) -> Dict:
+        logger.info("get_elapsed_time request. "
+                    f"[job_id]={job_id}")
+        return self.__qmpc_server.get_elapsed_time(job_id)

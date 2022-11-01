@@ -20,7 +20,7 @@ from .proto.libc_to_manage_pb2 import (DeleteSharesRequest,
                                        GetComputationResultRequest,
                                        GetDataListRequest, Input, JoinOrder,
                                        PredictRequest, SendModelParamRequest,
-                                       SendSharesRequest)
+                                       SendSharesRequest, GetElapsedTimeRequest)
 from .proto.libc_to_manage_pb2_grpc import LibcToManageStub
 from .share import Share
 from .utils.if_present import if_present
@@ -271,3 +271,18 @@ class QMPCServer:
         results = [eval(r.result) for r in response] if is_ok else None
 
         return {"is_ok": is_ok, "results": results}
+
+    def get_elapsed_time(self, job_uuid: str) -> Dict:
+        # リクエストパラメータを設定
+        req = GetElapsedTimeRequest(
+            job_uuid=job_uuid,
+            token=self.token
+        )
+        # 非同期にリクエスト送信
+        executor = ThreadPoolExecutor()
+        futures = [executor.submit(stub.GetElapsedTime,
+                                   req)
+                   for stub in self.__client_stubs]
+        is_ok, response = QMPCServer.__futures_result(futures)
+        elapsed_time = max([eval(res.result) for res in response]) if is_ok else None
+        return {"is_ok":is_ok,"results":elapsed_time}
