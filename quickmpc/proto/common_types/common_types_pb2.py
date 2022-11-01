@@ -13,6 +13,8 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
+
+
 DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x1f\x63ommon_types/common_types.proto\x12\x0fpb_common_types*\\\n\tJobStatus\x12\x0b\n\x07UNKNOWN\x10\x00\x12\x0b\n\x07PRE_JOB\x10\x01\x12\x0b\n\x07READ_DB\x10\x02\x12\x0b\n\x07\x43OMPUTE\x10\x03\x12\x0c\n\x08WRITE_DB\x10\x04\x12\r\n\tCOMPLETED\x10\x05*\xf1\x02\n\x11\x43omputationMethod\x12\"\n\x1e\x43OMPUTATION_METHOD_UNSPECIFIED\x10\x00\x12\x1b\n\x17\x43OMPUTATION_METHOD_MEAN\x10\x01\x12\x1f\n\x1b\x43OMPUTATION_METHOD_VARIANCE\x10\x02\x12\x1a\n\x16\x43OMPUTATION_METHOD_SUM\x10\x03\x12\x1d\n\x19\x43OMPUTATION_METHOD_CORREL\x10\x04\x12(\n$COMPUTATION_METHOD_LINEAR_REGRESSION\x10\x05\x12*\n&COMPUTATION_METHOD_LOGISTIC_REGRESSION\x10\x06\x12 \n\x1c\x43OMPUTATION_METHOD_MESH_CODE\x10\x07\x12$\n COMPUTATION_METHOD_DECISION_TREE\x10\x08\x12!\n\x1d\x43OMPUTATION_METHOD_JOIN_TABLE\x10\t*\xbd\x01\n\rPredictMethod\x12\x1e\n\x1aPREDICT_METHOD_UNSPECIFIED\x10\x00\x12$\n PREDICT_METHOD_LINEAR_REGRESSION\x10\x01\x12&\n\"PREDICT_METHOD_LOGISTIC_REGRESSION\x10\x02\x12 \n\x1cPREDICT_METHOD_DECISION_TREE\x10\x03\x12\x1c\n\x18PREDICT_METHOD_SID3_TREE\x10\x04\x42=Z;github.com/acompany-develop/QuickMPC/src/Proto/common_typesb\x06proto3')
 
 _JOBSTATUS = DESCRIPTOR.enum_types_by_name['JobStatus']
@@ -46,12 +48,12 @@ PREDICT_METHOD_SID3_TREE = 4
 
 if _descriptor._USE_C_DESCRIPTORS == False:
 
-    DESCRIPTOR._options = None
-    DESCRIPTOR._serialized_options = b'Z;github.com/acompany-develop/QuickMPC/src/Proto/common_types'
-    _JOBSTATUS._serialized_start = 52
-    _JOBSTATUS._serialized_end = 144
-    _COMPUTATIONMETHOD._serialized_start = 147
-    _COMPUTATIONMETHOD._serialized_end = 516
-    _PREDICTMETHOD._serialized_start = 519
-    _PREDICTMETHOD._serialized_end = 708
+  DESCRIPTOR._options = None
+  DESCRIPTOR._serialized_options = b'Z;github.com/acompany-develop/QuickMPC/src/Proto/common_types'
+  _JOBSTATUS._serialized_start=52
+  _JOBSTATUS._serialized_end=144
+  _COMPUTATIONMETHOD._serialized_start=147
+  _COMPUTATIONMETHOD._serialized_end=516
+  _PREDICTMETHOD._serialized_start=519
+  _PREDICTMETHOD._serialized_end=708
 # @@protoc_insertion_point(module_scope)
