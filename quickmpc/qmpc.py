@@ -256,3 +256,7 @@ class QMPC:
                     f"[secrets size]={len(secrets)}x{len(secrets[0])}")
         share = Share.sharize(secrets, self.__party_size)
         return {'is_ok': True, 'results': share}
+
+    @staticmethod
+    def set_log_level(level: int):
+        logger.setLevel(level)

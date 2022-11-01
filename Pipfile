@@ -18,6 +18,7 @@ isort = "*"
 mypy = "*"
 types-protobuf = "*"
 types-tabulate = "*"
+types-tqdm = "*"
 
 [requires]
 python_version = "3.7"
