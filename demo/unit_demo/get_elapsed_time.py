@@ -17,6 +17,5 @@ if __name__ == '__main__':
     # job_uuidを指定して計算結果を取得する
     job_uuid: str = "10b6bfda-8776-4d8c-ad9a-b40fa277ff37"
     res = qmpc.get_elapsed_time(job_uuid)
-    print(res)
-    elapsed_time = res["results"]
+    elapsed_time = res["elapsed_time"]
     logger.info(elapsed_time)
