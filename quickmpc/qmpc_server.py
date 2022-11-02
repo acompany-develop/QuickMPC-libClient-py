@@ -293,6 +293,6 @@ class QMPCServer:
                                    req)
                    for stub in self.__client_stubs]
         is_ok, response = QMPCServer.__futures_result(futures)
-        elapsed_time = max([eval(res.result)
+        elapsed_time = max([res.elapsed_time
                             for res in response]) if is_ok else None
-        return {"is_ok": is_ok, "results": elapsed_time}
+        return {"is_ok": is_ok, "elapsed_time": elapsed_time}
