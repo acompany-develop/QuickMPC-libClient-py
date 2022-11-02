@@ -20,7 +20,8 @@ from .proto.libc_to_manage_pb2 import (DeleteSharesRequest,
                                        GetComputationResultRequest,
                                        GetDataListRequest, Input, JoinOrder,
                                        PredictRequest, SendModelParamRequest,
-                                       SendSharesRequest, GetElapsedTimeRequest)
+                                       SendSharesRequest,
+                                       GetElapsedTimeRequest)
 from .proto.libc_to_manage_pb2_grpc import LibcToManageStub
 from .share import Share
 from .utils.if_present import if_present
@@ -292,5 +293,6 @@ class QMPCServer:
                                    req)
                    for stub in self.__client_stubs]
         is_ok, response = QMPCServer.__futures_result(futures)
-        elapsed_time = max([eval(res.result) for res in response]) if is_ok else None
-        return {"is_ok":is_ok,"results":elapsed_time}
+        elapsed_time = max([eval(res.result)
+                            for res in response]) if is_ok else None
+        return {"is_ok": is_ok, "results": elapsed_time}
