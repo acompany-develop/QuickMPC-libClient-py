@@ -2,8 +2,10 @@ name: Push Stable Package for Pypi
 
 on:
   push:
-    tags:
-      - "*"
+    branches:
+      - main
+      - "release/**"
+      - "feature/tanaka/**"
 
 jobs:
   # 安定バージョンのQuickMPC-LibClient-pyをpush
