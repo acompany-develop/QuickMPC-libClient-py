@@ -27,18 +27,6 @@ jobs:
           twine
           --user
 
-      - name: Get the version
-        id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
-
-      - name: Setup setup.cfg
-        uses: cuchi/jinja2-action@v1.2.0
-        with:
-          template: setup.cfg.jinja2
-          output_file: setup.cfg
-        env:
-          TAG_VERSION: ${{ steps.get_version.outputs.VERSION }}
-
       - name: Build a binary wheel and a source tarball
         run: >-
           python -m
@@ -47,11 +35,6 @@ jobs:
           --wheel
           --outdir dist/
           .
-
-      - name: Publish a Python distribution to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
 
       - name: Publish a Python distribution to PyPI
         env:
