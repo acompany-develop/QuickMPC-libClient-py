@@ -28,6 +28,7 @@ jobs:
           pip install
           build
           twine
+          setuptools_scm
           --user
 
       - name: Build a binary wheel and a source tarball
