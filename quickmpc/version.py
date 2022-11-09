@@ -1,5 +1,5 @@
 try:
-    from ._version import __version__
+    from ._version import __version__  # type: ignore
 except ImportError:
     try:
         from setuptools_scm import get_version
