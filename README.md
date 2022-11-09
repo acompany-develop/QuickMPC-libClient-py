@@ -34,4 +34,3 @@ $ pipenv run make fmt
 3.7.10
 
 Tests have been done with 3.7, 3.8, and 3.9, so they all work.
-

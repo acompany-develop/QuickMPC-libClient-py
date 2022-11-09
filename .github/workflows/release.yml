@@ -1,14 +1,13 @@
 name: Push Stable Package for Pypi
 
 on:
-  push:
-    branches:
-      - main
-      - "release/**"
+  release:
+    types: [published]
 
 jobs:
   # 安定バージョンのQuickMPC-LibClient-pyをpush
   build_and_push_libc:
+    name: Build and publish Python 🐍 distributions 📦 to PyPI
     runs-on: ubuntu-latest
 
     steps:
@@ -37,7 +36,7 @@ jobs:
           --outdir dist/
           .
 
-      - name: Publish a Python distribution to PyPI
+      - name: Publish distribution 📦 to PyPI
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
