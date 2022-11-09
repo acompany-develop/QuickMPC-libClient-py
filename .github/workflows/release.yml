@@ -5,7 +5,7 @@ on:
     types: [published]
   push:
     branches:
-      - "release/**"
+      - "feature/tanaka/**"
 
 jobs:
   # 安定バージョンのQuickMPC-LibClient-pyをpush
