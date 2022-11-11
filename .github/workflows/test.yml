@@ -13,25 +13,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Set up Python 3.7
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.7
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
 
-    - name: Install dependencies
-      run: |
-        pip install tox
-        tox -e flake8,mypy --notest
+      - name: Install dependencies
+        run: |
+          pip install tox
+          tox -e flake8,mypy --notest
 
-    - name: Lint with flake8
-      run: |
-        tox -e flake8 --skip-pkg-install
+      - name: Lint with flake8
+        run: |
+          tox -e flake8 --skip-pkg-install
 
-    - name: Lint with mypy
-      run: |
-        tox -e mypy --skip-pkg-install
+      - name: Lint with mypy
+        run: |
+          tox -e mypy --skip-pkg-install
 
   # UnitTest
   unit_tests:
@@ -41,25 +41,26 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: [
-          {python: 3.7, tox: py37},
-          {python: 3.8, tox: py38},
-          {python: 3.9, tox: py39}
-        ]
+        version:
+          [
+            { python: 3.7, tox: py37 },
+            { python: 3.8, tox: py38 },
+            { python: 3.9, tox: py39 },
+          ]
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - name: Set up Python ${{ matrix.version.python }}
-      uses: actions/setup-python@v2
-      with:
-        python-version: ${{ matrix.version.python }}
+      - name: Set up Python ${{ matrix.version.python }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.version.python }}
 
-    - name: Install dependencies
-      run: |
-        pip install tox
-        tox -e ${{ matrix.version.tox }} --notest
+      - name: Install dependencies
+        run: |
+          pip install tox
+          tox -e ${{ matrix.version.tox }} --notest
 
-    - name: Test with pytest
-      run: |
-        tox -e ${{ matrix.version.tox }} --skip-pkg-install
+      - name: Test with pytest
+        run: |
+          tox -e ${{ matrix.version.tox }} --skip-pkg-install
