@@ -17,50 +17,50 @@ class LibcToManageStub(object):
             channel: A grpc.Channel.
         """
         self.SendShares = channel.unary_unary(
-            '/libctomanage.LibcToManage/SendShares',
-            request_serializer=libc__to__manage__pb2.SendSharesRequest.SerializeToString,
-            response_deserializer=libc__to__manage__pb2.SendSharesResponse.FromString,
-        )
+                '/libctomanage.LibcToManage/SendShares',
+                request_serializer=libc__to__manage__pb2.SendSharesRequest.SerializeToString,
+                response_deserializer=libc__to__manage__pb2.SendSharesResponse.FromString,
+                )
         self.DeleteShares = channel.unary_unary(
-            '/libctomanage.LibcToManage/DeleteShares',
-            request_serializer=libc__to__manage__pb2.DeleteSharesRequest.SerializeToString,
-            response_deserializer=libc__to__manage__pb2.DeleteSharesResponse.FromString,
-        )
+                '/libctomanage.LibcToManage/DeleteShares',
+                request_serializer=libc__to__manage__pb2.DeleteSharesRequest.SerializeToString,
+                response_deserializer=libc__to__manage__pb2.DeleteSharesResponse.FromString,
+                )
         self.GetSchema = channel.unary_unary(
-            '/libctomanage.LibcToManage/GetSchema',
-            request_serializer=libc__to__manage__pb2.GetSchemaRequest.SerializeToString,
-            response_deserializer=libc__to__manage__pb2.GetSchemaResponse.FromString,
-        )
+                '/libctomanage.LibcToManage/GetSchema',
+                request_serializer=libc__to__manage__pb2.GetSchemaRequest.SerializeToString,
+                response_deserializer=libc__to__manage__pb2.GetSchemaResponse.FromString,
+                )
         self.ExecuteComputation = channel.unary_unary(
-            '/libctomanage.LibcToManage/ExecuteComputation',
-            request_serializer=libc__to__manage__pb2.ExecuteComputationRequest.SerializeToString,
-            response_deserializer=libc__to__manage__pb2.ExecuteComputationResponse.FromString,
-        )
+                '/libctomanage.LibcToManage/ExecuteComputation',
+                request_serializer=libc__to__manage__pb2.ExecuteComputationRequest.SerializeToString,
+                response_deserializer=libc__to__manage__pb2.ExecuteComputationResponse.FromString,
+                )
         self.GetComputationResult = channel.unary_stream(
-            '/libctomanage.LibcToManage/GetComputationResult',
-            request_serializer=libc__to__manage__pb2.GetComputationResultRequest.SerializeToString,
-            response_deserializer=libc__to__manage__pb2.GetComputationResultResponse.FromString,
-        )
+                '/libctomanage.LibcToManage/GetComputationResult',
+                request_serializer=libc__to__manage__pb2.GetComputationResultRequest.SerializeToString,
+                response_deserializer=libc__to__manage__pb2.GetComputationResultResponse.FromString,
+                )
         self.SendModelParam = channel.unary_unary(
-            '/libctomanage.LibcToManage/SendModelParam',
-            request_serializer=libc__to__manage__pb2.SendModelParamRequest.SerializeToString,
-            response_deserializer=libc__to__manage__pb2.SendModelParamResponse.FromString,
-        )
+                '/libctomanage.LibcToManage/SendModelParam',
+                request_serializer=libc__to__manage__pb2.SendModelParamRequest.SerializeToString,
+                response_deserializer=libc__to__manage__pb2.SendModelParamResponse.FromString,
+                )
         self.Predict = channel.unary_unary(
-            '/libctomanage.LibcToManage/Predict',
-            request_serializer=libc__to__manage__pb2.PredictRequest.SerializeToString,
-            response_deserializer=libc__to__manage__pb2.PredictResponse.FromString,
-        )
+                '/libctomanage.LibcToManage/Predict',
+                request_serializer=libc__to__manage__pb2.PredictRequest.SerializeToString,
+                response_deserializer=libc__to__manage__pb2.PredictResponse.FromString,
+                )
         self.GetDataList = channel.unary_unary(
-            '/libctomanage.LibcToManage/GetDataList',
-            request_serializer=libc__to__manage__pb2.GetDataListRequest.SerializeToString,
-            response_deserializer=libc__to__manage__pb2.GetDataListResponse.FromString,
-        )
+                '/libctomanage.LibcToManage/GetDataList',
+                request_serializer=libc__to__manage__pb2.GetDataListRequest.SerializeToString,
+                response_deserializer=libc__to__manage__pb2.GetDataListResponse.FromString,
+                )
         self.GetElapsedTime = channel.unary_unary(
-            '/libctomanage.LibcToManage/GetElapsedTime',
-            request_serializer=libc__to__manage__pb2.GetElapsedTimeRequest.SerializeToString,
-            response_deserializer=libc__to__manage__pb2.GetElapsedTimeResponse.FromString,
-        )
+                '/libctomanage.LibcToManage/GetElapsedTime',
+                request_serializer=libc__to__manage__pb2.GetElapsedTimeRequest.SerializeToString,
+                response_deserializer=libc__to__manage__pb2.GetElapsedTimeResponse.FromString,
+                )
 
 
 class LibcToManageServicer(object):
@@ -125,59 +125,58 @@ class LibcToManageServicer(object):
 
 def add_LibcToManageServicer_to_server(servicer, server):
     rpc_method_handlers = {
-        'SendShares': grpc.unary_unary_rpc_method_handler(
-            servicer.SendShares,
-            request_deserializer=libc__to__manage__pb2.SendSharesRequest.FromString,
-            response_serializer=libc__to__manage__pb2.SendSharesResponse.SerializeToString,
-        ),
-        'DeleteShares': grpc.unary_unary_rpc_method_handler(
-            servicer.DeleteShares,
-            request_deserializer=libc__to__manage__pb2.DeleteSharesRequest.FromString,
-            response_serializer=libc__to__manage__pb2.DeleteSharesResponse.SerializeToString,
-        ),
-        'GetSchema': grpc.unary_unary_rpc_method_handler(
-            servicer.GetSchema,
-            request_deserializer=libc__to__manage__pb2.GetSchemaRequest.FromString,
-            response_serializer=libc__to__manage__pb2.GetSchemaResponse.SerializeToString,
-        ),
-        'ExecuteComputation': grpc.unary_unary_rpc_method_handler(
-            servicer.ExecuteComputation,
-            request_deserializer=libc__to__manage__pb2.ExecuteComputationRequest.FromString,
-            response_serializer=libc__to__manage__pb2.ExecuteComputationResponse.SerializeToString,
-        ),
-        'GetComputationResult': grpc.unary_stream_rpc_method_handler(
-            servicer.GetComputationResult,
-            request_deserializer=libc__to__manage__pb2.GetComputationResultRequest.FromString,
-            response_serializer=libc__to__manage__pb2.GetComputationResultResponse.SerializeToString,
-        ),
-        'SendModelParam': grpc.unary_unary_rpc_method_handler(
-            servicer.SendModelParam,
-            request_deserializer=libc__to__manage__pb2.SendModelParamRequest.FromString,
-            response_serializer=libc__to__manage__pb2.SendModelParamResponse.SerializeToString,
-        ),
-        'Predict': grpc.unary_unary_rpc_method_handler(
-            servicer.Predict,
-            request_deserializer=libc__to__manage__pb2.PredictRequest.FromString,
-            response_serializer=libc__to__manage__pb2.PredictResponse.SerializeToString,
-        ),
-        'GetDataList': grpc.unary_unary_rpc_method_handler(
-            servicer.GetDataList,
-            request_deserializer=libc__to__manage__pb2.GetDataListRequest.FromString,
-            response_serializer=libc__to__manage__pb2.GetDataListResponse.SerializeToString,
-        ),
-        'GetElapsedTime': grpc.unary_unary_rpc_method_handler(
-            servicer.GetElapsedTime,
-            request_deserializer=libc__to__manage__pb2.GetElapsedTimeRequest.FromString,
-            response_serializer=libc__to__manage__pb2.GetElapsedTimeResponse.SerializeToString,
-        ),
+            'SendShares': grpc.unary_unary_rpc_method_handler(
+                    servicer.SendShares,
+                    request_deserializer=libc__to__manage__pb2.SendSharesRequest.FromString,
+                    response_serializer=libc__to__manage__pb2.SendSharesResponse.SerializeToString,
+            ),
+            'DeleteShares': grpc.unary_unary_rpc_method_handler(
+                    servicer.DeleteShares,
+                    request_deserializer=libc__to__manage__pb2.DeleteSharesRequest.FromString,
+                    response_serializer=libc__to__manage__pb2.DeleteSharesResponse.SerializeToString,
+            ),
+            'GetSchema': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetSchema,
+                    request_deserializer=libc__to__manage__pb2.GetSchemaRequest.FromString,
+                    response_serializer=libc__to__manage__pb2.GetSchemaResponse.SerializeToString,
+            ),
+            'ExecuteComputation': grpc.unary_unary_rpc_method_handler(
+                    servicer.ExecuteComputation,
+                    request_deserializer=libc__to__manage__pb2.ExecuteComputationRequest.FromString,
+                    response_serializer=libc__to__manage__pb2.ExecuteComputationResponse.SerializeToString,
+            ),
+            'GetComputationResult': grpc.unary_stream_rpc_method_handler(
+                    servicer.GetComputationResult,
+                    request_deserializer=libc__to__manage__pb2.GetComputationResultRequest.FromString,
+                    response_serializer=libc__to__manage__pb2.GetComputationResultResponse.SerializeToString,
+            ),
+            'SendModelParam': grpc.unary_unary_rpc_method_handler(
+                    servicer.SendModelParam,
+                    request_deserializer=libc__to__manage__pb2.SendModelParamRequest.FromString,
+                    response_serializer=libc__to__manage__pb2.SendModelParamResponse.SerializeToString,
+            ),
+            'Predict': grpc.unary_unary_rpc_method_handler(
+                    servicer.Predict,
+                    request_deserializer=libc__to__manage__pb2.PredictRequest.FromString,
+                    response_serializer=libc__to__manage__pb2.PredictResponse.SerializeToString,
+            ),
+            'GetDataList': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetDataList,
+                    request_deserializer=libc__to__manage__pb2.GetDataListRequest.FromString,
+                    response_serializer=libc__to__manage__pb2.GetDataListResponse.SerializeToString,
+            ),
+            'GetElapsedTime': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetElapsedTime,
+                    request_deserializer=libc__to__manage__pb2.GetElapsedTimeRequest.FromString,
+                    response_serializer=libc__to__manage__pb2.GetElapsedTimeResponse.SerializeToString,
+            ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-        'libctomanage.LibcToManage', rpc_method_handlers)
+            'libctomanage.LibcToManage', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
+
  # This class is part of an EXPERIMENTAL API.
-
-
 class LibcToManage(object):
     """*
     LibcToManage service
@@ -185,153 +184,153 @@ class LibcToManage(object):
 
     @staticmethod
     def SendShares(request,
-                   target,
-                   options=(),
-                   channel_credentials=None,
-                   call_credentials=None,
-                   insecure=False,
-                   compression=None,
-                   wait_for_ready=None,
-                   timeout=None,
-                   metadata=None):
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_unary(request, target, '/libctomanage.LibcToManage/SendShares',
-                                             libc__to__manage__pb2.SendSharesRequest.SerializeToString,
-                                             libc__to__manage__pb2.SendSharesResponse.FromString,
-                                             options, channel_credentials,
-                                             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            libc__to__manage__pb2.SendSharesRequest.SerializeToString,
+            libc__to__manage__pb2.SendSharesResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
     def DeleteShares(request,
-                     target,
-                     options=(),
-                     channel_credentials=None,
-                     call_credentials=None,
-                     insecure=False,
-                     compression=None,
-                     wait_for_ready=None,
-                     timeout=None,
-                     metadata=None):
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_unary(request, target, '/libctomanage.LibcToManage/DeleteShares',
-                                             libc__to__manage__pb2.DeleteSharesRequest.SerializeToString,
-                                             libc__to__manage__pb2.DeleteSharesResponse.FromString,
-                                             options, channel_credentials,
-                                             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            libc__to__manage__pb2.DeleteSharesRequest.SerializeToString,
+            libc__to__manage__pb2.DeleteSharesResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
     def GetSchema(request,
-                  target,
-                  options=(),
-                  channel_credentials=None,
-                  call_credentials=None,
-                  insecure=False,
-                  compression=None,
-                  wait_for_ready=None,
-                  timeout=None,
-                  metadata=None):
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_unary(request, target, '/libctomanage.LibcToManage/GetSchema',
-                                             libc__to__manage__pb2.GetSchemaRequest.SerializeToString,
-                                             libc__to__manage__pb2.GetSchemaResponse.FromString,
-                                             options, channel_credentials,
-                                             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            libc__to__manage__pb2.GetSchemaRequest.SerializeToString,
+            libc__to__manage__pb2.GetSchemaResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
     def ExecuteComputation(request,
-                           target,
-                           options=(),
-                           channel_credentials=None,
-                           call_credentials=None,
-                           insecure=False,
-                           compression=None,
-                           wait_for_ready=None,
-                           timeout=None,
-                           metadata=None):
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_unary(request, target, '/libctomanage.LibcToManage/ExecuteComputation',
-                                             libc__to__manage__pb2.ExecuteComputationRequest.SerializeToString,
-                                             libc__to__manage__pb2.ExecuteComputationResponse.FromString,
-                                             options, channel_credentials,
-                                             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            libc__to__manage__pb2.ExecuteComputationRequest.SerializeToString,
+            libc__to__manage__pb2.ExecuteComputationResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
     def GetComputationResult(request,
-                             target,
-                             options=(),
-                             channel_credentials=None,
-                             call_credentials=None,
-                             insecure=False,
-                             compression=None,
-                             wait_for_ready=None,
-                             timeout=None,
-                             metadata=None):
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_stream(request, target, '/libctomanage.LibcToManage/GetComputationResult',
-                                              libc__to__manage__pb2.GetComputationResultRequest.SerializeToString,
-                                              libc__to__manage__pb2.GetComputationResultResponse.FromString,
-                                              options, channel_credentials,
-                                              insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            libc__to__manage__pb2.GetComputationResultRequest.SerializeToString,
+            libc__to__manage__pb2.GetComputationResultResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
     def SendModelParam(request,
-                       target,
-                       options=(),
-                       channel_credentials=None,
-                       call_credentials=None,
-                       insecure=False,
-                       compression=None,
-                       wait_for_ready=None,
-                       timeout=None,
-                       metadata=None):
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_unary(request, target, '/libctomanage.LibcToManage/SendModelParam',
-                                             libc__to__manage__pb2.SendModelParamRequest.SerializeToString,
-                                             libc__to__manage__pb2.SendModelParamResponse.FromString,
-                                             options, channel_credentials,
-                                             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            libc__to__manage__pb2.SendModelParamRequest.SerializeToString,
+            libc__to__manage__pb2.SendModelParamResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
     def Predict(request,
-                target,
-                options=(),
-                channel_credentials=None,
-                call_credentials=None,
-                insecure=False,
-                compression=None,
-                wait_for_ready=None,
-                timeout=None,
-                metadata=None):
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_unary(request, target, '/libctomanage.LibcToManage/Predict',
-                                             libc__to__manage__pb2.PredictRequest.SerializeToString,
-                                             libc__to__manage__pb2.PredictResponse.FromString,
-                                             options, channel_credentials,
-                                             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            libc__to__manage__pb2.PredictRequest.SerializeToString,
+            libc__to__manage__pb2.PredictResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
     def GetDataList(request,
-                    target,
-                    options=(),
-                    channel_credentials=None,
-                    call_credentials=None,
-                    insecure=False,
-                    compression=None,
-                    wait_for_ready=None,
-                    timeout=None,
-                    metadata=None):
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_unary(request, target, '/libctomanage.LibcToManage/GetDataList',
-                                             libc__to__manage__pb2.GetDataListRequest.SerializeToString,
-                                             libc__to__manage__pb2.GetDataListResponse.FromString,
-                                             options, channel_credentials,
-                                             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            libc__to__manage__pb2.GetDataListRequest.SerializeToString,
+            libc__to__manage__pb2.GetDataListResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
     def GetElapsedTime(request,
-                       target,
-                       options=(),
-                       channel_credentials=None,
-                       call_credentials=None,
-                       insecure=False,
-                       compression=None,
-                       wait_for_ready=None,
-                       timeout=None,
-                       metadata=None):
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
         return grpc.experimental.unary_unary(request, target, '/libctomanage.LibcToManage/GetElapsedTime',
-                                             libc__to__manage__pb2.GetElapsedTimeRequest.SerializeToString,
-                                             libc__to__manage__pb2.GetElapsedTimeResponse.FromString,
-                                             options, channel_credentials,
-                                             insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
+            libc__to__manage__pb2.GetElapsedTimeRequest.SerializeToString,
+            libc__to__manage__pb2.GetElapsedTimeResponse.FromString,
+            options, channel_credentials,
+            insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
