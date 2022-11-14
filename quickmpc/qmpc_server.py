@@ -132,7 +132,7 @@ class QMPCServer:
                                        schema=schema,
                                        piece_id=piece_id,
                                        sent_at=sent_at,
-                                       matching_column=matching_column
+                                       matching_column=matching_column,
                                        token=self.token))
                    for piece_id, share_piece in enumerate(shares)
                    for stub, s in zip(self.__client_stubs, share_piece)
