@@ -1,3 +1,4 @@
+import ast
 import datetime
 import hashlib
 import json
@@ -213,7 +214,7 @@ class QMPCServer:
         # piece_id順にresultを結合
         results_str = ["".join(map(lambda r: r.result, res))
                        for res in results_sorted]
-        results = [eval(eval(r))
+        results = [json.loads(ast.literal_eval(r))
                    for r in results_str] if all_completed else None
 
         # reconsして返す
