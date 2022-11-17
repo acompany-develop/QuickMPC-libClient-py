@@ -128,6 +128,9 @@ class QMPCServer:
         if matching_column <= 0 and matching_column > len(schema):
             raise IndexError("mathcing_column is out of range")
 
+        if np.any([len(s) != len(schema) for s in secrets]):
+            raise RuntimeError("schema size and table colummn size are different.")
+
         """ Shareをコンテナに送信 """
         sorted_secrets = sorted(
             secrets, key=lambda row: row[matching_column - 1])
