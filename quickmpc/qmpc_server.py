@@ -68,6 +68,16 @@ class QMPCServer:
         return channel
 
     @staticmethod
+    def _size_check(join_order: List[List[int]]):
+        if len(join_order[0])-1 != len(join_order[1]):
+            logger.error('joinの要素数はdataIdsの要素数-1と一致している必要があります．')
+            return False
+        if len(join_order[0]) != len(join_order[2]):
+            logger.error('indexの要素数はdataIdsの要素数と一致している必要があります．')
+            return False
+        return True
+
+    @staticmethod
     def __futures_result(
             futures: Iterable, enable_progress_bar=True) -> Tuple[bool, List]:
         """ エラーチェックしてfutureのresultを得る """
@@ -154,6 +164,9 @@ class QMPCServer:
     def execute_computation(self, method_id: int,
                             join_order: Tuple[List, List, List],
                             inp: Tuple[List, List]) -> Dict:
+        if not self._size_check(join_order):
+            raise RuntimeError("引数が正しくありません．")
+
         """ 計算リクエストを送信 """
         join_order_req = JoinOrder(
             dataIds=join_order[0],
@@ -252,6 +265,9 @@ class QMPCServer:
                 model_id: int,
                 join_order: Tuple[List, List, List],
                 src: List[int]) -> Dict:
+        if not self._size_check(join_order):
+            raise RuntimeError("引数が正しくありません．")
+
         """ モデルから予測値を取得 """
         # リクエストパラメータを設定
         job_uuid: str = str(uuid.uuid4())
