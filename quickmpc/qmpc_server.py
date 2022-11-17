@@ -121,6 +121,9 @@ class QMPCServer:
     def __send_share_impl(self, secrets: List, schema: List[str],
                           matching_column: int,
                           piece_size: int) -> Dict:
+        if piece_size < 1000 and piece_size > 1_000_000:
+            raise RuntimeError("piece_size must be in the range of 1000 to 1000000")
+
         """ Shareをコンテナに送信 """
         sorted_secrets = sorted(
             secrets, key=lambda row: row[matching_column - 1])
@@ -238,6 +241,9 @@ class QMPCServer:
 
     def send_model_params(self, params: list,
                           piece_size: int) -> Dict:
+        if piece_size < 1000 and piece_size > 1_000_000:
+            raise RuntimeError("piece_size must be in the range of 1000 to 1000000")
+
         """ モデルパラメータをコンテナに送信 """
         # リクエストパラメータを設定
         job_uuid: str = str(uuid.uuid4())
