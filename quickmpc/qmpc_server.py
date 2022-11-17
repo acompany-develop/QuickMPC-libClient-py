@@ -13,6 +13,7 @@ from typing import Dict, Iterable, List, Tuple
 from urllib.parse import urlparse
 
 import grpc
+import numpy as np
 import tqdm  # type: ignore
 
 from .proto.common_types.common_types_pb2 import JobStatus
@@ -123,6 +124,9 @@ class QMPCServer:
                           piece_size: int) -> Dict:
         if piece_size < 1000 and piece_size > 1_000_000:
             raise RuntimeError("piece_size must be in the range of 1000 to 1000000")
+
+        if matching_column <= 0 and matching_column > len(schema):
+            raise IndexError("mathcing_column is out of range")
 
         """ Shareをコンテナに送信 """
         sorted_secrets = sorted(
