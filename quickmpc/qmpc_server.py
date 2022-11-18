@@ -123,13 +123,16 @@ class QMPCServer:
                           matching_column: int,
                           piece_size: int) -> Dict:
         if piece_size < 1000 and piece_size > 1_000_000:
-            raise RuntimeError("piece_size must be in the range of 1000 to 1000000")
+            raise RuntimeError(
+                "piece_size must be in the range of 1000 to 1000000")
 
-        if matching_column <= 0 and matching_column > len(schema):
-            raise IndexError("mathcing_column is out of range")
+        if matching_column <= 0 or matching_column > len(schema):
+            raise IndexError(
+                "mathcing_column is out of range")
 
         if np.any([len(s) != len(schema) for s in secrets]):
-            raise RuntimeError("schema size and table colummn size are different.")
+            raise RuntimeError(
+                "schema size and table colummn size are different.")
 
         """ Shareをコンテナに送信 """
         sorted_secrets = sorted(
@@ -249,7 +252,8 @@ class QMPCServer:
     def send_model_params(self, params: list,
                           piece_size: int) -> Dict:
         if piece_size < 1000 and piece_size > 1_000_000:
-            raise RuntimeError("piece_size must be in the range of 1000 to 1000000")
+            raise RuntimeError(
+                "piece_size must be in the range of 1000 to 1000000")
 
         """ モデルパラメータをコンテナに送信 """
         # リクエストパラメータを設定
