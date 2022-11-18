@@ -13,7 +13,6 @@ from typing import Dict, Iterable, List, Tuple
 from urllib.parse import urlparse
 
 import grpc
-import numpy as np
 import tqdm  # type: ignore
 
 from .proto.common_types.common_types_pb2 import JobStatus
@@ -29,6 +28,7 @@ from .share import Share
 from .utils.if_present import if_present
 from .utils.make_pieces import MakePiece
 from .utils.overload_tools import ArgmentError, Dim2, Dim3, methoddispatch
+from .utils.parse_csv import format_check
 
 abs_file = os.path.abspath(__file__)
 base_dir = os.path.dirname(abs_file)
@@ -130,9 +130,9 @@ class QMPCServer:
             raise IndexError(
                 "mathcing_column is out of range")
 
-        if np.any([len(s) != len(schema) for s in secrets]):
-            raise RuntimeError(
-                "schema size and table colummn size are different.")
+        # TODO parse_csv経由でsend_shareをすると同じチェックをすることになってしまう。
+        if not format_check(secrets, schema):
+            raise RuntimeError("規定されたフォーマットでないデータです．")
 
         """ Shareをコンテナに送信 """
         sorted_secrets = sorted(
