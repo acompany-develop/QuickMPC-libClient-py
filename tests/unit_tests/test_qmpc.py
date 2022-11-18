@@ -119,6 +119,16 @@ class TestQMPC:
         """ serverにモデル値予測リクエストを送れるかのTest """
         model_param_job_uuid: str = "uuid"
         model_id: int = 1
+        response: Dict[str, Any] = self.qmpc.predict(
+            model_param_job_uuid, model_id,
+            [["id1", "id2"], [0], [1, 1]], [0, 1])
+        assert (response["is_ok"])
+
+    def test_predict_errorhandring(self, run_server1,
+                                   run_server2, run_server3):
+        """ serverにモデル値予測リクエストを送れるかのTest """
+        model_param_job_uuid: str = "uuid"
+        model_id: int = 1
 
         with pytest.raises(Exception):
             # data_idsの要素数-1とjoinの要素数が一致していない
