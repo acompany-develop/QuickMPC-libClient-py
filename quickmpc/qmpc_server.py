@@ -127,8 +127,8 @@ class QMPCServer:
                 "piece_size must be in the range of 1000 to 1000000")
 
         if matching_column <= 0 or matching_column > len(schema):
-            raise IndexError(
-                "mathcing_column is out of range")
+            raise RuntimeError(
+                "matching_column must be in the range of 1 to the size of schema")
 
         # TODO parse_csv経由でsend_shareをすると同じチェックをすることになる．
         if not format_check(secrets, schema):
