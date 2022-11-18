@@ -130,7 +130,7 @@ class QMPCServer:
             raise IndexError(
                 "mathcing_column is out of range")
 
-        # TODO parse_csv経由でsend_shareをすると同じチェックをすることになってしまう。
+        # TODO parse_csv経由でsend_shareをすると同じチェックをすることになる．
         if not format_check(secrets, schema):
             raise RuntimeError("規定されたフォーマットでないデータです．")
 
@@ -178,7 +178,7 @@ class QMPCServer:
                             join_order: Tuple[List, List, List],
                             inp: Tuple[List, List]) -> Dict:
         if not self._size_check(join_order):
-            raise RuntimeError("引数が正しくありません．")
+            raise ArgmentError("引数が正しくありません．")
 
         """ 計算リクエストを送信 """
         join_order_req = JoinOrder(
@@ -283,7 +283,7 @@ class QMPCServer:
                 join_order: Tuple[List, List, List],
                 src: List[int]) -> Dict:
         if not self._size_check(join_order):
-            raise RuntimeError("引数が正しくありません．")
+            raise ArgmentError("引数が正しくありません．")
 
         """ モデルから予測値を取得 """
         # リクエストパラメータを設定
