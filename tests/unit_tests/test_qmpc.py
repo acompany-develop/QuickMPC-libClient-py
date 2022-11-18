@@ -80,6 +80,16 @@ class TestQMPC:
             self.qmpc.execute_computation(
                 1,
                 [["id1", "id2"], [0], [1]], [[0, 1], []])
+        with pytest.raises(Exception):
+            # joinの値が0より小さい
+            self.qmpc.execute_computation(
+                1,
+                [["id1", "id2"], [-1], [1,1]], [[0, 1], []])
+        with pytest.raises(Exception):
+            # joinの値が2より大きい
+            self.qmpc.execute_computation(
+                1,
+                [["id1", "id2"], [3], [1,1]], [[0, 1], []])
 
     def test_get_computation_resultRequest(self, run_server1,
                                            run_server2, run_server3):
@@ -120,6 +130,16 @@ class TestQMPC:
             self.qmpc.predict(
                 model_param_job_uuid, model_id,
                 [["id1", "id2"], [0], [1]], [0, 1])
+        with pytest.raises(Exception):
+            # joinの値が0より小さい
+            self.qmpc.predict(
+                model_param_job_uuid, model_id,
+                [["id1", "id2"], [-1], [1]], [0, 1])
+        with pytest.raises(Exception):
+            # joinの値が2より大きい
+            self.qmpc.predict(
+                model_param_job_uuid, model_id,
+                [["id1", "id2"], [3], [1]], [0, 1])
 
     def test_get_data_list(self, run_server1, run_server2, run_server3):
         """ serverにシェアを送れるかのTest"""
