@@ -71,12 +71,12 @@ class QMPCServer:
     @staticmethod
     def _argument_check(join_order: Tuple[List, List, List]):
         if len(join_order[0])-1 != len(join_order[1]):
-            logger.error('joinの要素数はdataIdsの要素数-1と一致している必要があります．')
+            logger.error('the size of join must be one less than the size of dataIds')
             return False
         if len(join_order[0]) != len(join_order[2]):
-            logger.error('indexの要素数はdataIdsの要素数と一致している必要があります．')
+            logger.error('the size of index must match the size of dataIds')
             return False
-        # TODO joinをenumにする 
+        # TODO joinをenumにする
         if not all([0<= join <=2 for join in join_order[1]]):
             logger.error('join value must be in the range of 0 to 2')
             return False
