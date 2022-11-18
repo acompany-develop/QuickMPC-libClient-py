@@ -52,6 +52,7 @@ class TestQMPC:
             self.qmpc.send_share(
                 [[1, 1, 2], [2, 3, 4]], ["id", "a", "a"], 1, 1000)
         with pytest.raises(Exception):
+            # 正方行列でない
             self.qmpc.send_share(
                 [[1, 1, 2], [2, 3, 4, 5]], ["id", "a", "b"], 1, 1000)
 
