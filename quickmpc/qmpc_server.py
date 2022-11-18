@@ -69,7 +69,7 @@ class QMPCServer:
         return channel
 
     @staticmethod
-    def _size_check(join_order: List[List[int]]):
+    def _size_check(join_order: Tuple[List, List, List]):
         if len(join_order[0])-1 != len(join_order[1]):
             logger.error('joinの要素数はdataIdsの要素数-1と一致している必要があります．')
             return False
