@@ -5,6 +5,7 @@ import pytest
 from quickmpc.qmpc_server import QMPCServer
 from quickmpc.utils.overload_tools import ArgmentError
 
+
 class TestQMPC:
     qmpc: QMPCServer = QMPCServer(
         ["http://localhost:9001",
@@ -54,7 +55,8 @@ class TestQMPC:
         with pytest.raises(RuntimeError):
             # 正方行列でない
             self.qmpc.send_share(
-                [[1, 1, 2], [2, 3, 4, 5]], ["attr1", "attr2", "attr3"], 1, 1000)
+                [[1, 1, 2], [2, 3, 4, 5]],
+                ["attr1", "attr2", "attr3"], 1, 1000)
 
     def test_delete_shares(self, run_server1, run_server2, run_server3):
         """ serverにシェア削除要求を送れるかのTest"""
