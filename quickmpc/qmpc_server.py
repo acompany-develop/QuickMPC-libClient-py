@@ -71,13 +71,14 @@ class QMPCServer:
     @staticmethod
     def _argument_check(join_order: Tuple[List, List, List]):
         if len(join_order[0])-1 != len(join_order[1]):
-            logger.error('the size of join must be one less than the size of dataIds')
+            logger.error(
+                'the size of join must be one less than the size of dataIds')
             return False
         if len(join_order[0]) != len(join_order[2]):
             logger.error('the size of index must match the size of dataIds')
             return False
         # TODO joinをenumにする
-        if not all([0<= join <=2 for join in join_order[1]]):
+        if not all([0 <= join <= 2 for join in join_order[1]]):
             logger.error('join value must be in the range of 0 to 2')
             return False
         return True
@@ -132,7 +133,8 @@ class QMPCServer:
 
         if matching_column <= 0 or matching_column > len(schema):
             raise RuntimeError(
-                "matching_column must be in the range of 1 to the size of schema")
+                "matching_column must be in the "
+                "range of 1 to the size of schema")
 
         # TODO parse_csv経由でsend_shareをすると同じチェックをすることになる．
         if not format_check(secrets, schema):
