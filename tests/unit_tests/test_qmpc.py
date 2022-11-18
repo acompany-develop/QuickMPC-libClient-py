@@ -53,7 +53,7 @@ class TestQMPC:
             self.qmpc.send_share(
                 [[1, 1, 2], [2, 3, 4]], ["attr1", "attr2", "attr2"], 1, 1000)
         with pytest.raises(RuntimeError):
-            # 正方行列でない
+            # 行によって列数が異なる
             self.qmpc.send_share(
                 [[1, 1, 2], [2, 3, 4, 5]],
                 ["attr1", "attr2", "attr3"], 1, 1000)
