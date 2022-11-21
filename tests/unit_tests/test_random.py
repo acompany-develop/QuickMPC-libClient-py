@@ -58,7 +58,7 @@ class TestCsprng:
             assert (lower <= x and x < upper)
             assert (isinstance(x, Decimal))
 
-    @ pytest.mark.parametrize(
+    @pytest.mark.parametrize(
         ("lower", "upper"),
         [
             (0, 0),
