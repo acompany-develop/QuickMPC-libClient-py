@@ -29,10 +29,11 @@ def generate_files():
 def format_files():
     files = glob.glob("./**/*.py", recursive=True)
     for file in files:
-        print(file)
         autopep8.main(["autopep8", "--in-place", file])
 
 
 if __name__ == '__main__':
     generate_files()
+    print("generate finished")
     format_files()
+    print("format finished")
