@@ -9,7 +9,8 @@ def generate_files():
     protoc.main(
         (
             "",
-            "-I{}".format(pkg_resources.resource_filename('grpc_tools', '_proto')),
+            "-I{}".format(pkg_resources.resource_filename('grpc_tools',
+                                                          '_proto')),
             "-I.",
             "--python_out=.",
             "--grpc_python_out=.",
