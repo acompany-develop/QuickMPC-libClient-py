@@ -1,4 +1,5 @@
 import math
+from decimal import Decimal
 
 import numpy as np
 import pytest
@@ -27,8 +28,10 @@ class TestQMPC:
     def test_recons_list(self, shares: list):
         """ 3パーティの復元が正しくできるかTest """
         secrets: list = Share.recons(shares)
-        shares_float: np.ndarray = np.vectorize(float)(Share.sharize(secrets))
-        assert (np.allclose(secrets, np.sum(shares_float, axis=0)))
+        shares_float: np.ndarray = \
+            np.vectorize(Decimal)(Share.sharize(secrets))
+        assert (np.allclose(secrets,
+                            np.vectorize(float)(np.sum(shares_float, axis=0))))
 
     @pytest.mark.parametrize(
         ("shares", "secrets_true"),
@@ -92,8 +95,10 @@ class TestQMPC:
     def test_recons_multi(self, shares: list):
         """ nパーティのシェアの復元が正しくできるかTest """
         secrets: list = Share.recons(shares)
-        shares_float: np.ndarray = np.vectorize(float)(Share.sharize(secrets))
-        assert (np.allclose(secrets, np.sum(shares_float, axis=0)))
+        shares_float: np.ndarray = \
+            np.vectorize(Decimal)(Share.sharize(secrets))
+        assert (np.allclose(secrets,
+                            np.vectorize(float)(np.sum(shares_float, axis=0))))
 
     def test_recons_errorhandring(self):
         """ 異常値を与えてエラーが出るかTest """

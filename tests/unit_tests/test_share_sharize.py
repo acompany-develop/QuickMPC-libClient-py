@@ -1,8 +1,9 @@
-import math
+from decimal import Decimal
 from typing import List
 
 import numpy as np
 import pytest
+
 from quickmpc.share import Share
 
 
@@ -25,10 +26,11 @@ class TestQMPC:
     def test_sharize(self, secrets: list):
         """ nパーティのシェア化が正しくできているかのTest """
         for party_size in range(2, 10):
-            shares: np.ndarray = np.vectorize(float)(
+            shares: np.ndarray = np.vectorize(Decimal)(
                 Share.sharize(secrets, party_size=party_size))
             assert (len(shares) == party_size)
-            assert (np.allclose(secrets, np.sum(shares, axis=0)))
+            assert (np.allclose(secrets,
+                                np.vectorize(float)(np.sum(shares, axis=0))))
 
     @pytest.mark.parametrize(
         ("secrets"),
@@ -37,10 +39,10 @@ class TestQMPC:
     def test_sharize_scalar(self, secrets: list):
         """ nパーティのスカラ値のシェア化が正しくできているかのTest """
         for party_size in range(2, 10):
-            shares: np.ndarray = np.vectorize(float)(
+            shares: np.ndarray = np.vectorize(Decimal)(
                 Share.sharize(secrets, party_size=party_size))
             assert (len(shares) == party_size)
-            assert (np.sum(shares) == pytest.approx(secrets))
+            assert (float(np.sum(shares)) == pytest.approx(secrets))
 
     @pytest.mark.parametrize(
         ("secrets"),
@@ -72,10 +74,10 @@ class TestQMPC:
             for share in share_json:
                 for key, val in dfs(share).items():
                     if key not in share_map:
-                        share_map[key] = 0
-                    share_map[key] += float(val)
+                        share_map[key] = Decimal(0)
+                    share_map[key] += Decimal(val)
             for key, _ in dfs(share).items():
-                assert (math.isclose(share_map[key], true_map[key]))
+                assert (np.isclose(float(share_map[key]), true_map[key]))
 
     def test_sharize_errorhandring(self):
         """ 異常値を与えてエラーが出るかTest """
