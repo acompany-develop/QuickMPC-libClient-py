@@ -28,6 +28,7 @@ from .share import Share
 from .utils.if_present import if_present
 from .utils.make_pieces import MakePiece
 from .utils.overload_tools import ArgmentError, Dim2, Dim3, methoddispatch
+from .utils.parse_csv import format_check
 
 abs_file = os.path.abspath(__file__)
 base_dir = os.path.dirname(abs_file)
@@ -66,6 +67,21 @@ class QMPCServer:
                 "endpointsにサポートされてないプロトコルが指定されています．http/httpsのいずれかを指定してください．")
 
         return channel
+
+    @staticmethod
+    def _argument_check(join_order: Tuple[List, List, List]):
+        if len(join_order[0])-1 != len(join_order[1]):
+            logger.error(
+                'the size of join must be one less than the size of dataIds')
+            return False
+        if len(join_order[0]) != len(join_order[2]):
+            logger.error('the size of index must match the size of dataIds')
+            return False
+        # TODO joinをenumにする
+        if not all([0 <= join <= 2 for join in join_order[1]]):
+            logger.error('join value must be in the range of 0 to 2')
+            return False
+        return True
 
     @staticmethod
     def __futures_result(
@@ -111,6 +127,19 @@ class QMPCServer:
     def __send_share_impl(self, secrets: List, schema: List[str],
                           matching_column: int,
                           piece_size: int) -> Dict:
+        if piece_size < 1000 or piece_size > 1_000_000:
+            raise RuntimeError(
+                "piece_size must be in the range of 1000 to 1000000")
+
+        if matching_column <= 0 or matching_column > len(schema):
+            raise RuntimeError(
+                "matching_column must be in the "
+                "range of 1 to the size of schema")
+
+        # TODO parse_csv経由でsend_shareをすると同じチェックをすることになる．
+        if not format_check(secrets, schema):
+            raise RuntimeError("規定されたフォーマットでないデータです．")
+
         """ Shareをコンテナに送信 """
         sorted_secrets = sorted(
             secrets, key=lambda row: row[matching_column - 1])
@@ -154,6 +183,9 @@ class QMPCServer:
     def execute_computation(self, method_id: int,
                             join_order: Tuple[List, List, List],
                             inp: Tuple[List, List]) -> Dict:
+        if not self._argument_check(join_order):
+            raise ArgmentError("引数が正しくありません．")
+
         """ 計算リクエストを送信 """
         join_order_req = JoinOrder(
             dataIds=join_order[0],
@@ -225,6 +257,10 @@ class QMPCServer:
 
     def send_model_params(self, params: list,
                           piece_size: int) -> Dict:
+        if piece_size < 1000 or piece_size > 1_000_000:
+            raise RuntimeError(
+                "piece_size must be in the range of 1000 to 1000000")
+
         """ モデルパラメータをコンテナに送信 """
         # リクエストパラメータを設定
         job_uuid: str = str(uuid.uuid4())
@@ -252,6 +288,9 @@ class QMPCServer:
                 model_id: int,
                 join_order: Tuple[List, List, List],
                 src: List[int]) -> Dict:
+        if not self._argument_check(join_order):
+            raise ArgmentError("引数が正しくありません．")
+
         """ モデルから予測値を取得 """
         # リクエストパラメータを設定
         job_uuid: str = str(uuid.uuid4())

@@ -3,6 +3,7 @@ from typing import Any, Dict
 import pytest
 
 from quickmpc.qmpc_server import QMPCServer
+from quickmpc.utils.overload_tools import ArgmentError
 
 
 class TestQMPC:
@@ -14,13 +15,48 @@ class TestQMPC:
     )
 
     @pytest.mark.parametrize(
-        ("secrets"), [([[1, 2, 3]]), ([[1], [2], [3]]), ]
+        ("secrets", "schema"), [
+            ([[1, 2, 3]], ["attr1", "attr2", "attr3"]),
+            ([[1], [2], [3]], ["attr1"]), ]
     )
-    def test_send_shares(self, secrets, run_server1, run_server2, run_server3):
+    def test_send_shares(self, secrets, schema,
+                         run_server1, run_server2, run_server3):
         """ serverにシェアを送れるかのTest"""
         response: Dict[str, Any] = self.qmpc.send_share(
-            secrets, [], 1, 1000)
+            secrets, schema, 1, 1000)
         assert (response["is_ok"])
+
+    def test_send_shares_errorhandring(self,
+                                       run_server1, run_server2, run_server3):
+        with pytest.raises(RuntimeError):
+            # piece_sizeが1000より小さい
+            self.qmpc.send_share(
+                [[1, 2, 3]], ["attr1", "attr2", "attr3"], 1, 500)
+        with pytest.raises(RuntimeError):
+            # piece_sizeが1000000より大きい
+            self.qmpc.send_share(
+                [[1, 2, 3]], ["attr1", "attr2", "attr3"], 1, 10000000)
+        with pytest.raises(RuntimeError):
+            # matching_columnが範囲外
+            self.qmpc.send_share(
+                [[1, 2, 3]], ["attr1", "attr2", "attr3"], -1, 1000)
+        with pytest.raises(RuntimeError):
+            # matching_columnが範囲外
+            self.qmpc.send_share(
+                [[1, 2, 3]], ["attr1", "attr2", "attr3"], 4, 1000)
+        with pytest.raises(TypeError):
+            # シェアがない
+            self.qmpc.send_share(
+                [], ["attr1", "attr2", "attr3"], 1, 1000)
+        with pytest.raises(RuntimeError):
+            # schemaに同じものが含まれる
+            self.qmpc.send_share(
+                [[1, 1, 2], [2, 3, 4]], ["attr1", "attr2", "attr2"], 1, 1000)
+        with pytest.raises(RuntimeError):
+            # 行によって列数が異なる
+            self.qmpc.send_share(
+                [[1, 1, 2], [2, 3, 4, 5]],
+                ["attr1", "attr2", "attr3"], 1, 1000)
 
     def test_delete_shares(self, run_server1, run_server2, run_server3):
         """ serverにシェア削除要求を送れるかのTest"""
@@ -35,6 +71,29 @@ class TestQMPC:
                 [["id1", "id2"], [0], [1, 1]], [[0, 1], []])
             assert (response["is_ok"])
 
+    def test_execute_computation_errorhandring(self, run_server1,
+                                               run_server2, run_server3):
+        with pytest.raises(ArgmentError):
+            # data_idsの要素数-1とjoinの要素数が一致していない
+            self.qmpc.execute_computation(
+                1,
+                [["id1", "id2"], [], [1, 1]], [[0, 1], []])
+        with pytest.raises(ArgmentError):
+            # data_idsの要素数とindexの要素数が一致していない
+            self.qmpc.execute_computation(
+                1,
+                [["id1", "id2"], [0], [1]], [[0, 1], []])
+        with pytest.raises(ArgmentError):
+            # joinの値が0より小さい
+            self.qmpc.execute_computation(
+                1,
+                [["id1", "id2"], [-1], [1, 1]], [[0, 1], []])
+        with pytest.raises(ArgmentError):
+            # joinの値が2より大きい
+            self.qmpc.execute_computation(
+                1,
+                [["id1", "id2"], [3], [1, 1]], [[0, 1], []])
+
     def test_get_computation_resultRequest(self, run_server1,
                                            run_server2, run_server3):
         """ serverから結果を得られるかのTest """
@@ -48,6 +107,17 @@ class TestQMPC:
             [[1, 2, 3]], 1000)
         assert (res["is_ok"])
 
+    def test_send_model_params_errorhandring(self, run_server1,
+                                             run_server2, run_server3):
+        with pytest.raises(RuntimeError):
+            # piece_sizeが1000より小さい
+            self.qmpc.send_model_params(
+                [[1, 2, 3]], 500)
+        with pytest.raises(RuntimeError):
+            # piece_sizeが1000000より大きい
+            self.qmpc.send_model_params(
+                [[1, 2, 3]], 10000000)
+
     def test_predict(self, run_server1, run_server2, run_server3):
         """ serverにモデル値予測リクエストを送れるかのTest """
         model_param_job_uuid: str = "uuid"
@@ -56,6 +126,33 @@ class TestQMPC:
             model_param_job_uuid, model_id,
             [["id1", "id2"], [0], [1, 1]], [0, 1])
         assert (response["is_ok"])
+
+    def test_predict_errorhandring(self, run_server1,
+                                   run_server2, run_server3):
+        """ serverにモデル値予測リクエストを送れるかのTest """
+        model_param_job_uuid: str = "uuid"
+        model_id: int = 1
+
+        with pytest.raises(ArgmentError):
+            # data_idsの要素数-1とjoinの要素数が一致していない
+            self.qmpc.predict(
+                model_param_job_uuid, model_id,
+                [["id1", "id2"], [], [1, 1]], [0, 1])
+        with pytest.raises(ArgmentError):
+            # data_idsの要素数とindexの要素数が一致していない
+            self.qmpc.predict(
+                model_param_job_uuid, model_id,
+                [["id1", "id2"], [0], [1]], [0, 1])
+        with pytest.raises(ArgmentError):
+            # joinの値が0より小さい
+            self.qmpc.predict(
+                model_param_job_uuid, model_id,
+                [["id1", "id2"], [-1], [1]], [0, 1])
+        with pytest.raises(ArgmentError):
+            # joinの値が2より大きい
+            self.qmpc.predict(
+                model_param_job_uuid, model_id,
+                [["id1", "id2"], [3], [1]], [0, 1])
 
     def test_get_data_list(self, run_server1, run_server2, run_server3):
         """ serverにシェアを送れるかのTest"""

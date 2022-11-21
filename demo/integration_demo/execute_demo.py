@@ -84,9 +84,7 @@ if __name__ == '__main__':
     for exe_func, inp, true_val in exe_set:
         logger.info(f"---- {exe_func.__name__} start ----")
         # TODO: Jobごとに使用するdata_idを選択できるようにする
-        exec_res = exe_func([data_ids, [0, 0], [1, 1, 1]], inp) \
-            if exe_func == qmpc.meshcode  \
-            else exe_func([data_ids, [0], [1, 1]], inp)
+        exec_res = exe_func([data_ids, [0, 0], [1, 1, 1]], inp)
 
         """ Step 4. 結果を取得 """
         job_uuid = exec_res["job_uuid"]
