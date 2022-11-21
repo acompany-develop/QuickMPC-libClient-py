@@ -103,9 +103,11 @@ class Share:
     def __recons_list1(shares: List):
         """ 1次元リストのシェアを復元 """
         try:
-            return sum([float(x) for x in shares])
+            # 文字列がfloatかどうかcheck
+            [float(x) for x in shares]
         except ValueError:
             return shares[0]
+        return float(sum([Decimal(x) for x in shares]))
 
     @recons.register(Dim2)
     @recons.register(Dim3)

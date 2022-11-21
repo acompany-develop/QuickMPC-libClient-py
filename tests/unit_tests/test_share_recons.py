@@ -1,4 +1,5 @@
 import math
+from decimal import Decimal
 
 import numpy as np
 import pytest
@@ -27,10 +28,12 @@ class TestQMPC:
     def test_recons_list(self, shares: list):
         """ 3パーティの復元が正しくできるかTest """
         secrets: list = Share.recons(shares)
-        shares_float: np.ndarray = np.vectorize(float)(Share.sharize(secrets))
-        assert (np.allclose(secrets, np.sum(shares_float, axis=0)))
+        shares_float: np.ndarray = \
+            np.vectorize(Decimal)(Share.sharize(secrets))
+        assert (np.allclose(secrets,
+                            np.vectorize(float)(np.sum(shares_float, axis=0))))
 
-    @pytest.mark.parametrize(
+    @ pytest.mark.parametrize(
         ("shares", "secrets_true"),
         [
             # 辞書型配列のシェア
@@ -73,7 +76,7 @@ class TestQMPC:
 
         assert (isclose(secrets, secrets_true))
 
-    @pytest.mark.parametrize(
+    @ pytest.mark.parametrize(
         ("shares"),
         [
             # 2パーティのシェア
@@ -92,8 +95,10 @@ class TestQMPC:
     def test_recons_multi(self, shares: list):
         """ nパーティのシェアの復元が正しくできるかTest """
         secrets: list = Share.recons(shares)
-        shares_float: np.ndarray = np.vectorize(float)(Share.sharize(secrets))
-        assert (np.allclose(secrets, np.sum(shares_float, axis=0)))
+        shares_float: np.ndarray = \
+            np.vectorize(Decimal)(Share.sharize(secrets))
+        assert (np.allclose(secrets,
+                            np.vectorize(float)(np.sum(shares_float, axis=0))))
 
     def test_recons_errorhandring(self):
         """ 異常値を与えてエラーが出るかTest """
@@ -102,7 +107,7 @@ class TestQMPC:
         with pytest.raises(Exception):
             Share.recons("hey")
 
-    @pytest.mark.parametrize(
+    @ pytest.mark.parametrize(
         ("secrets"),
         [
             # 1次元配列の秘密情報
@@ -118,12 +123,12 @@ class TestQMPC:
     )
     def test_sharize_recons(self, secrets: list):
         """ nパーティのシェア化，復元が正しくできてるかTest"""
-        for party_size in range(2, 10):
+        for party_size in range(2, 3):
             shares: list = Share.sharize(secrets, party_size=party_size)
             secrets_2: list = Share.recons(shares)
             assert (np.allclose(secrets, secrets_2))
 
-    @pytest.mark.parametrize(
+    @ pytest.mark.parametrize(
         ("shares"),
         [
             # str
