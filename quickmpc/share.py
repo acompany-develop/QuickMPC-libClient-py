@@ -1,5 +1,6 @@
 import logging
 from dataclasses import dataclass
+from decimal import Decimal
 from typing import ClassVar, List, Tuple
 
 import numpy as np
@@ -13,7 +14,8 @@ logger = logging.getLogger(__name__)
 
 @dataclass(frozen=True)
 class Share:
-    __share_random_range: ClassVar[Tuple[float, float]] = (-20000.0, 20000.0)
+    __share_random_range: ClassVar[Tuple[Decimal, Decimal]] =\
+        (Decimal(-(1 << 64)), Decimal(1 << 64))
 
     @methoddispatch(is_static_method=True)
     @staticmethod
@@ -35,7 +37,7 @@ class Share:
         rnd: RandomInterface = ChaCha20()
         shares: List[int] = rnd.get_list(
             *Share.__share_random_range, party_size)
-        shares[0] += secrets - np.sum(shares)
+        shares[0] += Decimal(secrets) - np.sum(shares)
         shares_str: List[str] = [str(n) for n in shares]
         return shares_str
 
@@ -49,7 +51,8 @@ class Share:
         shares: np.ndarray = np.array([
             rnd.get_list(*Share.__share_random_range, secrets_size)
             for __ in range(party_size - 1)])
-        s1: np.ndarray = np.subtract(np.array(secrets), np.sum(shares, axis=0))
+        s1: np.ndarray = np.subtract(np.frompyfunc(Decimal, 1, 1)(secrets),
+                                     np.sum(shares, axis=0))
         shares_str: List[List[str]] = np.vectorize(str)([s1, *shares]).tolist()
         return shares_str
 
@@ -66,8 +69,9 @@ class Share:
              for __ in range(secrets_size)]
             for ___ in range(party_size - 1)
         ])
-        s1: np.ndarray = np.subtract(np.array(secrets, dtype=float),
-                                     np.sum(shares, axis=0))
+        s1: np.ndarray = np.subtract(
+            np.frompyfunc(Decimal, 1, 1)(np.array(secrets, dtype=Decimal)),
+            np.sum(shares, axis=0))
         shares_str: List[List[List[str]]] = \
             np.vectorize(str)([s1, *shares]).tolist()
         return shares_str
