@@ -123,7 +123,7 @@ class TestQMPC:
     )
     def test_sharize_recons(self, secrets: list):
         """ nパーティのシェア化，復元が正しくできてるかTest"""
-        for party_size in range(2, 3):
+        for party_size in range(2, 10):
             shares: list = Share.sharize(secrets, party_size=party_size)
             secrets_2: list = Share.recons(shares)
             assert (np.allclose(secrets, secrets_2))
