@@ -115,7 +115,7 @@ class QMPCServer:
 
             # MC で Internal Server Error が発生している場合
             # 例外を rethrow する
-            if e.code == grpc.UNKHOWN:
+            if e.code == grpc.StatusCode.UNKNOWN:
                 raise e
         except Exception as e:
             is_ok = False
