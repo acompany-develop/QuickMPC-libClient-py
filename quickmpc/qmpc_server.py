@@ -14,7 +14,7 @@ from urllib.parse import urlparse
 
 import grpc
 import tqdm  # type: ignore
-from grpc_status import rpc_status
+from grpc_status import rpc_status  # type: ignore
 
 from .proto.common_types.common_types_pb2 import JobStatus, JobErrorInfo
 from .proto.libc_to_manage_pb2 import (DeleteSharesRequest,
@@ -102,7 +102,9 @@ class QMPCServer:
             status = rpc_status.from_call(e)
             if status is not None:
                 for detail in status.details:
-                    if detail.Is(JobErrorInfo.DESCRIPTOR):
+                    if detail.Is(
+                        JobErrorInfo.DESCRIPTOR   # type: ignore[attr-defined]
+                    ):
                         # CC で Job 実行時にエラーが発生していた場合
                         # 例外を rethrow する
                         err_info = JobErrorInfo()
