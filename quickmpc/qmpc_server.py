@@ -14,8 +14,9 @@ from urllib.parse import urlparse
 
 import grpc
 import tqdm  # type: ignore
+from grpc_status import rpc_status  # type: ignore
 
-from .proto.common_types.common_types_pb2 import JobStatus
+from .proto.common_types.common_types_pb2 import JobStatus, JobErrorInfo
 from .proto.libc_to_manage_pb2 import (DeleteSharesRequest,
                                        ExecuteComputationRequest,
                                        GetComputationResultRequest,
@@ -96,6 +97,26 @@ class QMPCServer:
         except grpc.RpcError as e:
             is_ok = False
             logger.error(f'{e.details()} ({e.code()})')
+
+            # エラーが詳細な情報を持っているか確認
+            status = rpc_status.from_call(e)
+            if status is not None:
+                for detail in status.details:
+                    if detail.Is(
+                        JobErrorInfo.DESCRIPTOR   # type: ignore[attr-defined]
+                    ):
+                        # CC で Job 実行時にエラーが発生していた場合
+                        # 例外を rethrow する
+                        err_info = JobErrorInfo()
+                        detail.Unpack(err_info)
+                        logger.error(f"job error information: {err_info}")
+
+                        raise e
+
+            # MC で Internal Server Error が発生している場合
+            # 例外を rethrow する
+            if e.code == grpc.StatusCode.UNKNOWN:
+                raise e
         except Exception as e:
             is_ok = False
             logger.error(e)

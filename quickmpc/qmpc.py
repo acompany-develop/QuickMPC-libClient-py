@@ -18,6 +18,7 @@ ComputationMethod: enum_type_wrapper.EnumTypeWrapper \
     = common_types_pb2.ComputationMethod
 PredictMethod: enum_type_wrapper.EnumTypeWrapper \
     = common_types_pb2.PredictMethod
+JobErrorInfo = common_types_pb2.JobErrorInfo
 
 
 @dataclass(frozen=True)
