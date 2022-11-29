@@ -79,6 +79,31 @@ class TestQMPC:
             for key, _ in dfs(share).items():
                 assert (np.isclose(float(share_map[key]), true_map[key]))
 
+    @pytest.mark.parametrize(
+        ("secrets"),
+        [
+            # 1次元配列の秘密情報
+            ([1e999]),
+            # 2次元配列の秘密情報
+            ([[1e999]])
+        ]
+    )
+    def test_sharize_convert_to_inf(self, secrets: list):
+        """ Infinityがinfに変換されているかのTest """
+        for party_size in range(2, 10):
+            shares = Share.sharize(secrets, party_size=party_size)
+
+            def is_inf(val):
+                ok: bool = True
+                if isinstance(val, list):
+                    for v in val:
+                        ok &= is_inf(v)
+                else:
+                    ok &= (val == 'inf')
+                return ok
+
+            assert (is_inf(shares[0]))
+
     def test_sharize_errorhandring(self):
         """ 異常値を与えてエラーが出るかTest """
         with pytest.raises(Exception):
