@@ -17,6 +17,10 @@ class Share:
     __share_random_range: ClassVar[Tuple[Decimal, Decimal]] =\
         (Decimal(-(1 << 64)), Decimal(1 << 64))
 
+    def __to_str(val: Decimal) -> str:
+        # InfinityをCCで読み込めるinfに変換
+        return 'inf' if Decimal.is_infinite(val) else str(val)
+
     @methoddispatch(is_static_method=True)
     @staticmethod
     def sharize(_, __):
@@ -53,7 +57,8 @@ class Share:
             for __ in range(party_size - 1)])
         s1: np.ndarray = np.subtract(np.frompyfunc(Decimal, 1, 1)(secrets),
                                      np.sum(shares, axis=0))
-        shares_str: List[List[str]] = np.vectorize(str)([s1, *shares]).tolist()
+        shares_str: List[List[str]] = \
+            np.vectorize(Share.__to_str)([s1, *shares]).tolist()
         return shares_str
 
     @sharize.register(Dim2)
@@ -73,7 +78,7 @@ class Share:
             np.frompyfunc(Decimal, 1, 1)(np.array(secrets, dtype=Decimal)),
             np.sum(shares, axis=0))
         shares_str: List[List[List[str]]] = \
-            np.vectorize(str)([s1, *shares]).tolist()
+            np.vectorize(Share.__to_str)([s1, *shares]).tolist()
         return shares_str
 
     @sharize.register(dict)
