@@ -17,6 +17,7 @@ class Share:
     __share_random_range: ClassVar[Tuple[Decimal, Decimal]] =\
         (Decimal(-(1 << 64)), Decimal(1 << 64))
 
+    @staticmethod
     def __to_str(val: Decimal) -> str:
         # InfinityをCCで読み込めるinfに変換
         return 'inf' if Decimal.is_infinite(val) else str(val)
