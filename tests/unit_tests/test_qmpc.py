@@ -166,7 +166,7 @@ class TestQMPC:
         with pytest.raises(QMPCJobError):
             qmpc.execute_computation(
                 1,
-                [["id1", "id2"], [0], [1, 1]], [[0, 1], []])
+                [["id1"], [], [1]], [[],[]])
 
     def test_exception_server_error(self):
         # QMPCServerErrorとして例外がthrowされるかのテスト
@@ -179,7 +179,7 @@ class TestQMPC:
         with pytest.raises(QMPCServerError):
             qmpc.execute_computation(
                 1,
-                [["id1", "id2"], [0], [1, 1]], [[0, 1], []])
+                [["id1"], [], [1]], [[],[]])
 
     def test_get_data_list(self, run_server1, run_server2, run_server3):
         """ serverにシェアを送れるかのTest"""
