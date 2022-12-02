@@ -2,6 +2,7 @@ from typing import Any, Dict
 
 import pytest
 
+from quickmpc.exception import QMPCServerError, QMPCJobError
 from quickmpc.qmpc_server import QMPCServer
 from quickmpc.utils.overload_tools import ArgmentError
 
@@ -153,6 +154,32 @@ class TestQMPC:
             self.qmpc.predict(
                 model_param_job_uuid, model_id,
                 [["id1", "id2"], [3], [1]], [0, 1])
+
+    def test_exception_job_error(self):
+        # QMPCJobErrorとして例外がthrowされるかのテスト
+        qmpc: QMPCServer = QMPCServer(
+            ["http://localhost:9001",
+             "http://localhost:9002",
+             "http://localhost:9003"],
+            "QMPCJobError"
+        )
+        with pytest.raises(QMPCJobError):
+            qmpc.execute_computation(
+                1,
+                [["id1", "id2"], [0], [1, 1]], [[0, 1], []])
+
+    def test_exception_server_error(self):
+        # QMPCServerErrorとして例外がthrowされるかのテスト
+        qmpc: QMPCServer = QMPCServer(
+            ["http://localhost:9001",
+             "http://localhost:9002",
+             "http://localhost:9003"],
+            "QMPCServerError"
+        )
+        with pytest.raises(QMPCServerError):
+            qmpc.execute_computation(
+                1,
+                [["id1", "id2"], [0], [1, 1]], [[0, 1], []])
 
     def test_get_data_list(self, run_server1, run_server2, run_server3):
         """ serverにシェアを送れるかのTest"""
