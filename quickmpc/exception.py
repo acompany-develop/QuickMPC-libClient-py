@@ -4,3 +4,6 @@ class QMPCJobError(Exception):
 
 class QMPCServerError(Exception):
     pass
+
+class ArgmentError(Exception):
+    pass

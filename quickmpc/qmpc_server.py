@@ -26,10 +26,10 @@ from .proto.libc_to_manage_pb2 import (DeleteSharesRequest,
                                        GetElapsedTimeRequest)
 from .proto.libc_to_manage_pb2_grpc import LibcToManageStub
 from .share import Share
-from .exception import QMPCJobError, QMPCServerError
+from .exception import ArgmentError, QMPCJobError, QMPCServerError
 from .utils.if_present import if_present
 from .utils.make_pieces import MakePiece
-from .utils.overload_tools import ArgmentError, Dim2, Dim3, methoddispatch
+from .utils.overload_tools import Dim2, Dim3, methoddispatch
 from .utils.parse_csv import format_check
 
 abs_file = os.path.abspath(__file__)
