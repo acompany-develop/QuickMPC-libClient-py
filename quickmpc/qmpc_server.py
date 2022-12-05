@@ -26,9 +26,10 @@ from .proto.libc_to_manage_pb2 import (DeleteSharesRequest,
                                        GetElapsedTimeRequest)
 from .proto.libc_to_manage_pb2_grpc import LibcToManageStub
 from .share import Share
+from .exception import ArgmentError, QMPCJobError, QMPCServerError
 from .utils.if_present import if_present
 from .utils.make_pieces import MakePiece
-from .utils.overload_tools import ArgmentError, Dim2, Dim3, methoddispatch
+from .utils.overload_tools import Dim2, Dim3, methoddispatch
 from .utils.parse_csv import format_check
 
 abs_file = os.path.abspath(__file__)
@@ -111,12 +112,12 @@ class QMPCServer:
                         detail.Unpack(err_info)
                         logger.error(f"job error information: {err_info}")
 
-                        raise e
+                        raise QMPCJobError(err_info) from e
 
             # MC で Internal Server Error が発生している場合
             # 例外を rethrow する
-            if e.code == grpc.StatusCode.UNKNOWN:
-                raise e
+            if e.code() == grpc.StatusCode.UNKNOWN:
+                raise QMPCServerError("backend server return error") from e
         except Exception as e:
             is_ok = False
             logger.error(e)

@@ -25,10 +25,6 @@ class DictList2:
     ...
 
 
-class ArgmentError(Exception):
-    ...
-
-
 def d(lst):
     if type(lst) != list:
         return 0

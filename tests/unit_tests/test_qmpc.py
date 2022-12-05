@@ -2,8 +2,8 @@ from typing import Any, Dict
 
 import pytest
 
+from quickmpc.exception import ArgmentError, QMPCServerError, QMPCJobError
 from quickmpc.qmpc_server import QMPCServer
-from quickmpc.utils.overload_tools import ArgmentError
 
 
 class TestQMPC:
@@ -153,6 +153,20 @@ class TestQMPC:
             self.qmpc.predict(
                 model_param_job_uuid, model_id,
                 [["id1", "id2"], [3], [1]], [0, 1])
+
+    def test_exception_job_error(self):
+        # QMPCJobErrorとして例外がthrowされるかのテスト
+        with pytest.raises(QMPCJobError):
+            self.qmpc.execute_computation(
+                1,
+                [["id1"], [], [1]], [[1000000000], []])
+
+    def test_exception_server_error(self):
+        # QMPCServerErrorとして例外がthrowされるかのテスト
+        with pytest.raises(QMPCServerError):
+            self.qmpc.execute_computation(
+                1,
+                [["UnregisteredDataId"], [], [1]], [[], []])
 
     def test_get_data_list(self, run_server1, run_server2, run_server3):
         """ serverにシェアを送れるかのTest"""

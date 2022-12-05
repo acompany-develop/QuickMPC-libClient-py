@@ -3,6 +3,10 @@ from concurrent import futures
 
 import grpc
 
+from google.rpc import code_pb2, status_pb2
+from grpc_status import rpc_status
+from google.protobuf import any_pb2
+from quickmpc.proto.common_types.common_types_pb2 import JobErrorInfo
 from quickmpc.proto import libc_to_manage_pb2, libc_to_manage_pb2_grpc
 
 
@@ -25,6 +29,30 @@ class LibToManageServiceServicer(libc_to_manage_pb2_grpc.LibcToManageServicer):
         return res
 
     def ExecuteComputation(self, request, context):
+        if len(request.arg.src) > 0 \
+                and request.arg.src[0] == 1000000000:
+            # QMPCJobError
+            # CC で Job 実行時にエラーが発生していた場合を再現
+            detail = any_pb2.Any()
+            detail.Pack(
+                JobErrorInfo(
+                    what="QMPCJobError",
+                )
+            )
+            rich_status = status_pb2.Status(
+                code=code_pb2.INVALID_ARGUMENT,
+                details=[detail]
+            )
+            context.abort_with_status(rpc_status.to_status(rich_status))
+            return libc_to_manage_pb2.ExecuteComputationResponse()
+
+        if len(request.table.dataIds) > 0 \
+                and request.table.dataIds[0] == "UnregisteredDataId":
+            # QMPCServerError
+            # MC で Internal Server Error が発生している場合を再現
+            context.set_code(grpc.StatusCode.UNKNOWN)
+            return libc_to_manage_pb2.ExecuteComputationResponse()
+
         res = libc_to_manage_pb2.ExecuteComputationResponse(
             message="ok",
             is_ok=True,
