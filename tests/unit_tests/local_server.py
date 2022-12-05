@@ -30,7 +30,8 @@ class LibToManageServiceServicer(libc_to_manage_pb2_grpc.LibcToManageServicer):
 
     def ExecuteComputation(self, request, context):
         if len(request.arg.src) > 0 \
-            and request.arg.src[0] == 1000000000: # QMPCJobError
+                and request.arg.src[0] == 1000000000:
+            # QMPCJobError
             # CC で Job 実行時にエラーが発生していた場合を再現
             detail = any_pb2.Any()
             detail.Pack(
@@ -46,7 +47,8 @@ class LibToManageServiceServicer(libc_to_manage_pb2_grpc.LibcToManageServicer):
             return libc_to_manage_pb2.ExecuteComputationResponse()
 
         if len(request.table.dataIds) > 0 \
-            and request.table.dataIds[0] == "UnregisteredDataId": # QMPCServerError
+                and request.table.dataIds[0] == "UnregisteredDataId":
+            # QMPCServerError
             # MC で Internal Server Error が発生している場合を再現
             context.set_code(grpc.StatusCode.UNKNOWN)
             return libc_to_manage_pb2.ExecuteComputationResponse()
