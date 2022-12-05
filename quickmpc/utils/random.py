@@ -5,7 +5,8 @@ from typing import ClassVar, List
 
 from nacl.utils import random, randombytes_deterministic
 
-from .overload_tools import ArgmentError, methoddispatch
+from .overload_tools import methoddispatch
+from ..exception import ArgmentError
 
 
 # 乱数生成のインタフェース

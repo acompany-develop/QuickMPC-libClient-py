@@ -5,9 +5,10 @@ from typing import ClassVar, List, Tuple
 
 import numpy as np
 
-from .utils.overload_tools import (ArgmentError, DictList, DictList2,
+from .utils.overload_tools import (DictList, DictList2,
                                    Dim1, Dim2, Dim3, methoddispatch)
 from .utils.random import ChaCha20, RandomInterface
+from .exception import ArgmentError
 
 logger = logging.getLogger(__name__)
 

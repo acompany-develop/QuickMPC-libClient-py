@@ -2,9 +2,8 @@ from typing import Any, Dict
 
 import pytest
 
-from quickmpc.exception import QMPCServerError, QMPCJobError
+from quickmpc.exception import ArgmentError, QMPCServerError, QMPCJobError
 from quickmpc.qmpc_server import QMPCServer
-from quickmpc.utils.overload_tools import ArgmentError
 
 
 class TestQMPC:

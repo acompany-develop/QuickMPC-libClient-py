@@ -3,7 +3,7 @@ from typing import List
 import pytest
 
 from quickmpc.utils.make_pieces import MakePiece
-from quickmpc.utils.overload_tools import ArgmentError
+from quickmpc.exception import ArgmentError
 
 
 class TestQMPC:
