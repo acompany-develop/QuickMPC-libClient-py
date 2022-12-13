@@ -275,7 +275,7 @@ class QMPCServer:
         results_str = ["".join(map(lambda r: r.result, res))
                        for res in results_sorted]
         results = [json.loads(ast.literal_eval(r))
-                   for r in results_str] if all_completed and path is not None else None
+                   for r in results_str] if all_completed and path is None else None
 
         # reconsして返す
         results = if_present(results, Share.recons)
