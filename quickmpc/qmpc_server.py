@@ -131,14 +131,16 @@ class QMPCServer:
         return is_ok, response
 
     @staticmethod
-    def __stream_result(stream: Iterable, job_uuid: str, party: int, path: str) -> Dict:
+    def __stream_result(stream: Iterable, job_uuid: str, party: int,
+                        path: str) -> Dict:
         """ エラーチェックしてstreamのresultを得る """
         is_ok: bool = True
         res_list = []
         for res in stream:
             is_ok &= res.is_ok
             if path is not None:
-                with open(f"{path}/{job_uuid}-{party}-{res.piece_id}", mode='w') as f:
+                file_path = f"{path}/{job_uuid}-{party}-{res.piece_id}"
+                with open(file_path, mode='w') as f:
                     f.write(res.result)
                 res.result = GetComputationResultResponse().result
             res_list.append(res)
@@ -249,7 +251,8 @@ class QMPCServer:
         # 非同期にリクエスト送信
         executor = ThreadPoolExecutor()
         futures = [executor.submit(QMPCServer.__stream_result,
-                                   stub.GetComputationResult(req), job_uuid, party, path)
+                                   stub.GetComputationResult(req),
+                                   job_uuid, party, path)
                    for party, stub in enumerate(self.__client_stubs)]
         is_ok, response = QMPCServer.__futures_result(
             futures, enable_progress_bar=False)
@@ -275,7 +278,8 @@ class QMPCServer:
         results_str = ["".join(map(lambda r: r.result, res))
                        for res in results_sorted]
         results = [json.loads(ast.literal_eval(r))
-                   for r in results_str] if all_completed and path is None else None
+                   for r in results_str
+                   ] if all_completed and path is None else None
 
         # reconsして返す
         results = if_present(results, Share.recons)
