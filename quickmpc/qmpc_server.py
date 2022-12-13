@@ -23,7 +23,8 @@ from .proto.libc_to_manage_pb2 import (DeleteSharesRequest,
                                        GetDataListRequest, Input, JoinOrder,
                                        PredictRequest, SendModelParamRequest,
                                        SendSharesRequest,
-                                       GetElapsedTimeRequest)
+                                       GetElapsedTimeRequest,
+                                       GetComputationResultResponse)
 from .proto.libc_to_manage_pb2_grpc import LibcToManageStub
 from .share import Share
 from .exception import ArgmentError, QMPCJobError, QMPCServerError
@@ -130,12 +131,16 @@ class QMPCServer:
         return is_ok, response
 
     @staticmethod
-    def __stream_result(stream: Iterable) -> Dict:
+    def __stream_result(stream: Iterable, job_uuid: str, party: int, path: str) -> Dict:
         """ エラーチェックしてstreamのresultを得る """
         is_ok: bool = True
         res_list = []
         for res in stream:
             is_ok &= res.is_ok
+            if path is not None:
+                with open(f"{path}/{job_uuid}-{party}-{res.piece_id}", mode='w') as f:
+                    f.write(res.result)
+                res.result = GetComputationResultResponse().result
             res_list.append(res)
         res_dict: Dict = {"is_ok": is_ok, "responses": res_list}
         return res_dict
@@ -234,7 +239,7 @@ class QMPCServer:
 
         return {"is_ok": is_ok, "job_uuid": job_uuid}
 
-    def get_computation_result(self, job_uuid: str) -> Dict:
+    def get_computation_result(self, job_uuid: str, path: str) -> Dict:
         """ コンテナから結果を取得 """
         # リクエストパラメータを設定
         req = GetComputationResultRequest(
@@ -244,8 +249,8 @@ class QMPCServer:
         # 非同期にリクエスト送信
         executor = ThreadPoolExecutor()
         futures = [executor.submit(QMPCServer.__stream_result,
-                                   stub.GetComputationResult(req))
-                   for stub in self.__client_stubs]
+                                   stub.GetComputationResult(req), job_uuid, party, path)
+                   for party, stub in enumerate(self.__client_stubs)]
         is_ok, response = QMPCServer.__futures_result(
             futures, enable_progress_bar=False)
 
@@ -270,7 +275,7 @@ class QMPCServer:
         results_str = ["".join(map(lambda r: r.result, res))
                        for res in results_sorted]
         results = [json.loads(ast.literal_eval(r))
-                   for r in results_str] if all_completed else None
+                   for r in results_str] if all_completed and path is not None else None
 
         # reconsして返す
         results = if_present(results, Share.recons)
