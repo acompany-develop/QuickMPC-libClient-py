@@ -264,8 +264,8 @@ class QMPC:
                     f"[job_id]={job_id}")
         return self.__qmpc_server.get_elapsed_time(job_id)
 
-    def restore(self, job_id: str, path: int):
-        logger.info("get_elapsed_time request. "
+    def restore(self, job_id: str, path: str):
+        logger.info("restore request. "
                     f"[job_id]={job_id} "
                     f"[path]={path}")
         return restore(job_id, path, self.__party_size)
