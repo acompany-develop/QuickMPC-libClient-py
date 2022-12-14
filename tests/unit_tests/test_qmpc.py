@@ -98,7 +98,8 @@ class TestQMPC:
                                            run_server2, run_server3):
         """ serverから結果を得られるかのTest """
         job_uuid: str = "uuid"
-        response: Dict[str, Any] = self.qmpc.get_computation_result(job_uuid)
+        response: Dict[str, Any] = self.qmpc.get_computation_result(
+            job_uuid, None)
         assert (response["is_ok"])
 
     def test_send_model_params(self, run_server1, run_server2, run_server3):

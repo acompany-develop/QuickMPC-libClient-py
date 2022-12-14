@@ -8,6 +8,7 @@ from grpc_status import rpc_status
 from google.protobuf import any_pb2
 from quickmpc.proto.common_types.common_types_pb2 import JobErrorInfo
 from quickmpc.proto import libc_to_manage_pb2, libc_to_manage_pb2_grpc
+from quickmpc.proto.common_types import common_types_pb2
 
 
 class LibToManageServiceServicer(libc_to_manage_pb2_grpc.LibcToManageServicer):
@@ -64,13 +65,15 @@ class LibToManageServiceServicer(libc_to_manage_pb2_grpc.LibcToManageServicer):
         yield libc_to_manage_pb2.GetComputationResultResponse(
             message="ok",
             is_ok=True,
-            result="['1',",
+            result='"[\\"1\\",',
+            status=common_types_pb2.COMPLETED,
             piece_id=1,
         )
         yield libc_to_manage_pb2.GetComputationResultResponse(
             message="ok",
             is_ok=True,
-            result="'2']",
+            result='\\"2\\"]"',
+            status=common_types_pb2.COMPLETED,
             piece_id=2,
         )
 

@@ -3,7 +3,8 @@
 yieldのタイミングで全てのTestが開始
 """
 import pytest
-
+import os
+import glob
 from .local_server import serve
 
 
@@ -17,6 +18,9 @@ def run_server1():
     yield
 
     """ test end """
+    for file in glob.glob("./tests/unit_tests/uuid*"):
+        os.remove(file)
+
     server.stop(0)
 
 
