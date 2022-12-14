@@ -183,7 +183,8 @@ class QMPC:
     def get_computation_result(self, job_id: str,
                                path: Optional[str] = None) -> Dict:
         logger.info("get_computation_result request. "
-                    f"[job_id]={job_id}")
+                    f"[job_id]={job_id} "
+                    f"[path]={path}")
         return self.__qmpc_server.get_computation_result(job_id, path)
 
     def send_model_params(self, params: list,
