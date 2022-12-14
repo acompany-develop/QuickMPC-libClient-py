@@ -130,6 +130,14 @@ if __name__ == '__main__':
                     pbars[key] = (pbar, procedure.progress)
 
         if get_res["results"] is not None:
+            for key in pbars:
+                pbar, prev = pbars[key]
+                if pbar is None:
+                    continue
+                pbar.update(100 - prev)
+                pbar.clear()
+                pbar.close()
+
             break
 
         time.sleep(1)
