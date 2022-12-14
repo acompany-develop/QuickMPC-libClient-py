@@ -1,6 +1,6 @@
 import logging
 from dataclasses import dataclass, field, InitVar
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Union
 
 from google.protobuf.internal import enum_type_wrapper
 
@@ -180,7 +180,8 @@ class QMPC:
             ComputationMethod.Value("COMPUTATION_METHOD_JOIN_TABLE"),
             join_order, (join_order[2], []))
 
-    def get_computation_result(self, job_id: str, path: str = None) -> Dict:
+    def get_computation_result(self, job_id: str,
+                               path: Union[str, None] = None) -> Dict:
         logger.info("get_computation_result request. "
                     f"[job_id]={job_id}")
         return self.__qmpc_server.get_computation_result(job_id, path)

@@ -9,7 +9,7 @@ import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field, InitVar
-from typing import Dict, Iterable, List, Tuple
+from typing import Dict, Iterable, List, Tuple, Union
 from urllib.parse import urlparse
 
 import grpc
@@ -132,7 +132,7 @@ class QMPCServer:
 
     @staticmethod
     def __stream_result(stream: Iterable, job_uuid: str, party: int,
-                        path: str) -> Dict:
+                        path: Union[str, None]) -> Dict:
         """ エラーチェックしてstreamのresultを得る """
         is_ok: bool = True
         res_list = []
@@ -241,7 +241,8 @@ class QMPCServer:
 
         return {"is_ok": is_ok, "job_uuid": job_uuid}
 
-    def get_computation_result(self, job_uuid: str, path: str) -> Dict:
+    def get_computation_result(self, job_uuid: str,
+                               path: Union[str, None]) -> Dict:
         """ コンテナから結果を取得 """
         # リクエストパラメータを設定
         req = GetComputationResultRequest(
