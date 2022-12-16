@@ -119,7 +119,8 @@ class Share:
     @recons.register(Dim2)
     @recons.register(Dim3)
     @staticmethod
-    def __recons_list(shares: List[List], f: Callable[[Any], Any] = float) -> List:
+    def __recons_list(shares: List[List],
+                      f: Callable[[Any], Any] = float) -> List:
         """ リストのシェアを復元 """
         secrets: List = [
             Share.recons([shares_pi[i] for shares_pi in shares], f)
@@ -129,7 +130,8 @@ class Share:
 
     @recons.register(DictList)
     @staticmethod
-    def __recons_dictlist(shares: List[dict], f: Callable[[Any], Any] = float) -> dict:
+    def __recons_dictlist(shares: List[dict],
+                          f: Callable[[Any], Any] = float) -> dict:
         """ 辞書型を復元 """
         secrets: dict = dict()
         for key in shares[0].keys():
@@ -141,7 +143,8 @@ class Share:
 
     @recons.register(DictList2)
     @staticmethod
-    def __recons_dictlist2(shares: List[List[dict]], f: Callable[[Any], Any] = float) -> list:
+    def __recons_dictlist2(shares: List[List[dict]],
+                           f: Callable[[Any], Any] = float) -> list:
         """ 辞書型配列を復元 """
         secrets: list = list()
         for i in range(len(shares[0])):
