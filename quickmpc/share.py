@@ -1,7 +1,7 @@
 import logging
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import ClassVar, List, Tuple
+from typing import ClassVar, List, Tuple, Callable, Any
 
 import numpy as np
 
@@ -107,46 +107,49 @@ class Share:
 
     @recons.register(Dim1)
     @staticmethod
-    def __recons_list1(shares: List):
+    def __recons_list1(shares: List, f: Callable[[Any], Any] = float):
         """ 1次元リストのシェアを復元 """
         try:
             # 文字列がfloatかどうかcheck
             [float(x) for x in shares]
         except ValueError:
             return shares[0]
-        return float(sum([Decimal(x) for x in shares]))
+        return f(sum([Decimal(x) for x in shares]))
 
     @recons.register(Dim2)
     @recons.register(Dim3)
     @staticmethod
-    def __recons_list(shares: List[List]) -> List:
+    def __recons_list(shares: List[List],
+                      f: Callable[[Any], Any] = float) -> List:
         """ リストのシェアを復元 """
         secrets: List = [
-            Share.recons([shares_pi[i] for shares_pi in shares])
+            Share.recons([shares_pi[i] for shares_pi in shares], f)
             for i in range(len(shares[0]))
         ]
         return secrets
 
     @recons.register(DictList)
     @staticmethod
-    def __recons_dictlist(shares: List[dict]) -> dict:
+    def __recons_dictlist(shares: List[dict],
+                          f: Callable[[Any], Any] = float) -> dict:
         """ 辞書型を復元 """
         secrets: dict = dict()
         for key in shares[0].keys():
             val = []
             for s in shares:
                 val.append(s[key])
-            secrets[key] = Share.recons(val)
+            secrets[key] = Share.recons(val, f)
         return secrets
 
     @recons.register(DictList2)
     @staticmethod
-    def __recons_dictlist2(shares: List[List[dict]]) -> list:
+    def __recons_dictlist2(shares: List[List[dict]],
+                           f: Callable[[Any], Any] = float) -> list:
         """ 辞書型配列を復元 """
         secrets: list = list()
         for i in range(len(shares[0])):
             val = []
             for s in shares:
                 val.append(s[i])
-            secrets.append(Share.recons(val))
+            secrets.append(Share.recons(val, f))
         return secrets
