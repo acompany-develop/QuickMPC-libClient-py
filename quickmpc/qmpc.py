@@ -7,7 +7,7 @@ from google.protobuf.internal import enum_type_wrapper
 from .proto.common_types import common_types_pb2
 from .qmpc_server import QMPCServer
 from .share import Share
-from .utils.restore import restore
+from .utils.restore import restore, restore_test
 from .utils.parse_csv import (parse, parse_csv, parse_csv_to_bitvector,
                               parse_to_bitvector)
 
@@ -271,6 +271,19 @@ class QMPC:
                     f"[job_id]={job_id} "
                     f"[path]={path}")
         return restore(job_id, path, self.__party_size)
+
+    def restore_test(self, job_id: str, path: str):
+        logger.info("restore request. "
+                    f"[job_id]={job_id} "
+                    f"[path]={path}")
+        return restore_test(job_id, path, self.__party_size)
+
+    def get_computation_result_test(self, job_id: str,
+                                    path: Optional[str] = None) -> Dict:
+        logger.info("get_computation_result_test request. "
+                    f"[job_id]={job_id} "
+                    f"[path]={path}")
+        return self.__qmpc_server.get_computation_result_test(job_id, path)
 
     @staticmethod
     def set_log_level(level: int):

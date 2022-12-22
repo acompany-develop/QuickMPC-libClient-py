@@ -7,9 +7,13 @@ import os
 import struct
 import time
 import uuid
+import csv
+import gc
+import numpy as np
+from decimal import Decimal
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field, InitVar
-from typing import Dict, Iterable, List, Tuple, Optional
+from typing import Dict, Iterable, List, Tuple, Optional, Any
 from urllib.parse import urlparse
 
 import grpc
@@ -24,7 +28,8 @@ from .proto.libc_to_manage_pb2 import (DeleteSharesRequest,
                                        PredictRequest, SendModelParamRequest,
                                        SendSharesRequest,
                                        GetElapsedTimeRequest,
-                                       GetComputationResultResponse)
+                                       GetComputationResultResponse,
+                                       GetComputationResultResponseTest)
 from .proto.libc_to_manage_pb2_grpc import LibcToManageStub
 from .share import Share
 from .exception import ArgmentError, QMPCJobError, QMPCServerError
@@ -369,3 +374,92 @@ class QMPCServer:
         elapsed_time = max([res.elapsed_time
                             for res in response]) if is_ok else None
         return {"is_ok": is_ok, "elapsed_time": elapsed_time}
+
+    @staticmethod
+    def __stream_result_test(stream: Iterable, job_uuid: str, party: int,
+                             path: Optional[str]) -> Dict:
+        """ エラーチェックしてstreamのresultを得る """
+        is_ok: bool = True
+        res_list = []
+        for res in stream:
+            is_ok &= res.is_ok
+            if path is not None:
+                file_title = "schema" if res.is_schema else "result"
+                file_path = f"{path}/{file_title}-{job_uuid}-{party}-{res.piece_id}.csv"
+                with open(file_path, 'w') as f:
+                    writer = csv.writer(f)
+                    is_dim2 = 1 if res.is_dim2 else 0
+                    writer.writerow([res.row_number,is_dim2])
+                    writer.writerow(res.result)
+                progress = res.progress if res.HasField('progress') else None
+                res = GetComputationResultResponseTest(
+                    message=res.message,
+                    is_ok=res.is_ok,
+                    row_number=res.row_number,
+                    status=res.status,
+                    piece_id=res.piece_id,
+                    progress=progress,
+                    is_schema=res.is_schema
+                )
+            res_list.append(res)
+        res_dict: Dict = {"is_ok": is_ok, "responses": res_list}
+        return res_dict
+
+    def get_computation_result_test(self, job_uuid: str,
+                                    path: Optional[str]) -> Dict:
+        """ コンテナから結果を取得 """
+        # リクエストパラメータを設定
+        req = GetComputationResultRequest(
+            job_uuid=job_uuid,
+            token=self.token
+        )
+        # 非同期にリクエスト送信
+        executor = ThreadPoolExecutor()
+        futures = [executor.submit(QMPCServer.__stream_result_test,
+                                   stub.GetComputationResultTest(req),
+                                   job_uuid, party, path)
+                   for party, stub in enumerate(self.__client_stubs)]
+        is_ok, response = QMPCServer.__futures_result(
+            futures, enable_progress_bar=False)
+        results_sorted = [sorted(res["responses"], key=lambda r: r.piece_id)
+                          for res in response]
+        # NOTE: statusは0番目(piece_id=1)の要素にのみ含まれている
+        statuses = [res[0].status for res in results_sorted] \
+            if results_sorted else None
+        all_completed = all([
+            s == JobStatus.Value('COMPLETED') for s in statuses
+        ]) if statuses is not None else False
+
+        progresses = None
+        if results_sorted is not None:
+            progresses = [
+                res[0].progress if res[0].HasField("progress") else None
+                for res in results_sorted
+            ]
+
+        results :Optional[Any] = None
+        if not path:
+            results = []
+            for res in results_sorted:
+                result :Any = [[]]
+                schema = []
+                tmp = 0
+                for r in res:
+                    if r.is_schema:
+                        for val in r.result:
+                            schema.append(val)
+                    else:
+                        for val in r.result:
+                            if tmp >= r.row_number:
+                                result.append([])
+                                tmp = 0
+                            result[-1].append(val)
+                            tmp += 1
+                result = result if res[0].is_dim2 else result[0]
+                result = result if len(schema) == 0 else {
+                    "schema": schema, "table": result}
+                results.append(result)
+
+        results = if_present(results, Share.recons)
+        return {"is_ok": is_ok, "statuses": statuses,
+                "results": results, "progresses": progresses}
