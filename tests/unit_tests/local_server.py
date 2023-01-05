@@ -68,6 +68,7 @@ class LibToManageServiceServicer(libc_to_manage_pb2_grpc.LibcToManageServicer):
             result=["1"],
             status=common_types_pb2.COMPLETED,
             piece_id=1,
+            column_number=2,
             is_dim1=True,
         )
         yield libc_to_manage_pb2.GetComputationResultResponse(
@@ -76,6 +77,7 @@ class LibToManageServiceServicer(libc_to_manage_pb2_grpc.LibcToManageServicer):
             result=["2"],
             status=common_types_pb2.COMPLETED,
             piece_id=2,
+            column_number=2,
             is_dim1=True,
         )
 

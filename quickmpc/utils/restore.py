@@ -34,6 +34,8 @@ def restore(job_uuid: str, path: str, party_size: int) -> Any:
     column_number = get_meta(job_uuid, path)
     is_dim2 = True if len(
         glob.glob(f"{path}/dim2-{job_uuid}-*")) != 0 else False
+    if column_number == 0:
+        return [[]] if is_dim2 else []
 
     for party in range(party_size):
         if party == 0:
