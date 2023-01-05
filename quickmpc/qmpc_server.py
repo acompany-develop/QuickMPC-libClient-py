@@ -1,5 +1,7 @@
 import ast
+import csv
 import datetime
+import gc
 import hashlib
 import json
 import logging
@@ -7,31 +9,29 @@ import os
 import struct
 import time
 import uuid
-import csv
-import gc
-import numpy as np
-from decimal import Decimal
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field, InitVar
-from typing import Dict, Iterable, List, Tuple, Optional, Any
+from decimal import Decimal
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 from urllib.parse import urlparse
 
 import grpc
+import numpy as np
 import tqdm  # type: ignore
 from grpc_status import rpc_status  # type: ignore
 
-from .proto.common_types.common_types_pb2 import JobStatus, JobErrorInfo
+from .exception import ArgmentError, QMPCJobError, QMPCServerError
+from .proto.common_types.common_types_pb2 import JobErrorInfo, JobStatus
 from .proto.libc_to_manage_pb2 import (DeleteSharesRequest,
                                        ExecuteComputationRequest,
                                        GetComputationResultRequest,
-                                       GetDataListRequest, Input, JoinOrder,
+                                       GetComputationResultResponse,
+                                       GetDataListRequest,
+                                       GetElapsedTimeRequest, Input, JoinOrder,
                                        PredictRequest, SendModelParamRequest,
-                                       SendSharesRequest,
-                                       GetElapsedTimeRequest,
-                                       GetComputationResultResponse)
+                                       SendSharesRequest)
 from .proto.libc_to_manage_pb2_grpc import LibcToManageStub
 from .share import Share
-from .exception import ArgmentError, QMPCJobError, QMPCServerError
 from .utils.if_present import if_present
 from .utils.make_pieces import MakePiece
 from .utils.overload_tools import Dim2, Dim3, methoddispatch
@@ -255,9 +255,8 @@ class QMPCServer:
         # リクエストパラメータを設定
         job_uuid: str = str(uuid.uuid4())
         params_share: list = Share.sharize(params, self.__party_size)
-
         params_share_pieces: list = [MakePiece.make_pieces(
-            json.dumps(p), piece_size) for p in params_share]
+            p, piece_size) for p in params_share]
 
         # 非同期にリクエスト送信
         executor = ThreadPoolExecutor()
@@ -362,7 +361,7 @@ class QMPCServer:
         return res_dict
 
     def get_computation_result(self, job_uuid: str,
-                                    path: Optional[str]) -> Dict:
+                               path: Optional[str]) -> Dict:
         """ コンテナから結果を取得 """
         # リクエストパラメータを設定
         req = GetComputationResultRequest(
@@ -393,13 +392,13 @@ class QMPCServer:
                 for res in results_sorted
             ]
 
-        results :Optional[Any] = None
+        results: Optional[Any] = None
         if not path and all_completed:
             for res in results_sorted:
                 is_table = False
                 is_dim2 = False
                 column_number = 0
-                result :Any = []
+                result: Any = []
                 schema = []
                 tmp = 0
                 for r in res:
@@ -417,9 +416,10 @@ class QMPCServer:
                     column_number = r.column_number
 
                 if is_dim2:
-                    result = np.array(result).reshape(-1,column_number).tolist()
+                    result = np.array(result).reshape(-1,
+                                                      column_number).tolist()
                 result = {"schema": schema, "table": result} if is_table \
-                        else result
+                    else result
                 if results is None:
                     results = []
                 results.append(result)
