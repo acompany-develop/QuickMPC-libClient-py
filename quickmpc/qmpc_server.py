@@ -28,8 +28,7 @@ from .proto.libc_to_manage_pb2 import (DeleteSharesRequest,
                                        PredictRequest, SendModelParamRequest,
                                        SendSharesRequest,
                                        GetElapsedTimeRequest,
-                                       GetComputationResultResponse,
-                                       GetComputationResultResponseTest)
+                                       GetComputationResultResponse)
 from .proto.libc_to_manage_pb2_grpc import LibcToManageStub
 from .share import Share
 from .exception import ArgmentError, QMPCJobError, QMPCServerError
@@ -246,52 +245,6 @@ class QMPCServer:
 
         return {"is_ok": is_ok, "job_uuid": job_uuid}
 
-    def get_computation_result(self, job_uuid: str,
-                               path: Optional[str]) -> Dict:
-        """ コンテナから結果を取得 """
-        # リクエストパラメータを設定
-        req = GetComputationResultRequest(
-            job_uuid=job_uuid,
-            token=self.token
-        )
-        # 非同期にリクエスト送信
-        executor = ThreadPoolExecutor()
-        futures = [executor.submit(QMPCServer.__stream_result,
-                                   stub.GetComputationResult(req),
-                                   job_uuid, party, path)
-                   for party, stub in enumerate(self.__client_stubs)]
-        is_ok, response = QMPCServer.__futures_result(
-            futures, enable_progress_bar=False)
-
-        results_sorted = [sorted(res["responses"], key=lambda r: r.piece_id)
-                          for res in response]
-
-        # NOTE: statusは0番目(piece_id=1)の要素にのみ含まれている
-        statuses = [res[0].status for res in results_sorted] \
-            if results_sorted else None
-        all_completed = all([
-            s == JobStatus.Value('COMPLETED') for s in statuses
-        ]) if statuses is not None else False
-
-        progresses = None
-        if results_sorted is not None:
-            progresses = [
-                res[0].progress if res[0].HasField("progress") else None
-                for res in results_sorted
-            ]
-
-        # piece_id順にresultを結合
-        results_str = ["".join(map(lambda r: r.result, res))
-                       for res in results_sorted]
-        results = [json.loads(ast.literal_eval(r))
-                   for r in results_str
-                   ] if all_completed and path is None else None
-
-        # reconsして返す
-        results = if_present(results, Share.recons)
-        return {"is_ok": is_ok, "statuses": statuses,
-                "results": results, "progresses": progresses}
-
     def send_model_params(self, params: list,
                           piece_size: int) -> Dict:
         if piece_size < 1000 or piece_size > 1_000_000:
@@ -384,28 +337,31 @@ class QMPCServer:
         for res in stream:
             is_ok &= res.is_ok
             if path is not None:
-                file_title = "schema" if res.is_schema else "result"
+                file_title = "dim1"
+                if res.HasField("is_dim2"):
+                    file_title = "dim2"
+                elif res.HasField("is_schema"):
+                    file_title = "schema"
+
                 file_path = f"{path}/{file_title}-{job_uuid}-{party}-{res.piece_id}.csv"
                 with open(file_path, 'w') as f:
                     writer = csv.writer(f)
-                    is_dim2 = 1 if res.is_dim2 else 0
-                    writer.writerow([res.row_number,is_dim2])
+                    writer.writerow([res.column_number])
                     writer.writerow(res.result)
                 progress = res.progress if res.HasField('progress') else None
                 res = GetComputationResultResponseTest(
                     message=res.message,
                     is_ok=res.is_ok,
-                    row_number=res.row_number,
+                    column_number=res.column_number,
                     status=res.status,
                     piece_id=res.piece_id,
                     progress=progress,
-                    is_schema=res.is_schema
                 )
             res_list.append(res)
         res_dict: Dict = {"is_ok": is_ok, "responses": res_list}
         return res_dict
 
-    def get_computation_result_test(self, job_uuid: str,
+    def get_computation_result(self, job_uuid: str,
                                     path: Optional[str]) -> Dict:
         """ コンテナから結果を取得 """
         # リクエストパラメータを設定
@@ -416,7 +372,7 @@ class QMPCServer:
         # 非同期にリクエスト送信
         executor = ThreadPoolExecutor()
         futures = [executor.submit(QMPCServer.__stream_result_test,
-                                   stub.GetComputationResultTest(req),
+                                   stub.GetComputationResult(req),
                                    job_uuid, party, path)
                    for party, stub in enumerate(self.__client_stubs)]
         is_ok, response = QMPCServer.__futures_result(
@@ -438,26 +394,34 @@ class QMPCServer:
             ]
 
         results :Optional[Any] = None
-        if not path:
-            results = []
+        if not path and all_completed:
             for res in results_sorted:
-                result :Any = [[]]
+                is_table = False
+                is_dim2 = False
+                column_number = 0
+                result :Any = []
                 schema = []
                 tmp = 0
                 for r in res:
-                    if r.is_schema:
+                    if r.HasField("is_schema"):
+                        if not is_table:
+                            is_table = True
                         for val in r.result:
                             schema.append(val)
                     else:
+                        if r.HasField("is_dim2"):
+                            is_dim2 = True
                         for val in r.result:
-                            if tmp >= r.row_number:
-                                result.append([])
-                                tmp = 0
-                            result[-1].append(val)
-                            tmp += 1
-                result = result if res[0].is_dim2 else result[0]
-                result = result if len(schema) == 0 else {
-                    "schema": schema, "table": result}
+                            result.append(val)
+
+                    column_number = r.column_number
+
+                if is_dim2:
+                    result = np.array(result).reshape(-1,column_number).tolist()
+                result = {"schema": schema, "table": result} if is_table \
+                        else result
+                if results is None:
+                    results = []
                 results.append(result)
 
         results = if_present(results, Share.recons)
