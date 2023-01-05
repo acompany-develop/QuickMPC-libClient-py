@@ -11,6 +11,18 @@ class TestQMPC:
     MATRIX: List[List[str]] = [[str(i) * i for i in range(1, 6)]] * 5
 
     @pytest.mark.parametrize(
+        ("array, size, expected"),
+        [
+            (["1", "2", "3", "4"], 4, [["1", "2", "3", "4"]]),
+            (["1", "2", "3", "4"], 3, [["1", "2", "3"], ["4"]]),
+            (["1", "2", "3", "4"], 2, [["1", "2"], ["3", "4"]]),
+        ]
+    )
+    def test_make_pieces_array(self, array, size, expected):
+        actual = MakePiece.make_pieces(array, size)
+        assert (actual == expected)
+
+    @ pytest.mark.parametrize(
         ("matrix, size, expected"),
         [
             (MATRIX, 75, [MATRIX]),
@@ -22,7 +34,7 @@ class TestQMPC:
         actual = MakePiece.make_pieces(matrix, size)
         assert (actual == expected)
 
-    @pytest.mark.parametrize(
+    @ pytest.mark.parametrize(
         ("string, size, expected"),
         [
             # 空文字列
@@ -46,7 +58,7 @@ class TestQMPC:
         actual = MakePiece.make_pieces(string, size)
         assert (actual == expected)
 
-    @pytest.mark.parametrize(
+    @ pytest.mark.parametrize(
         ("args, error"),
         [
             ([MATRIX, 0], RuntimeError),          # サイズが小さい場合
@@ -60,7 +72,7 @@ class TestQMPC:
         with pytest.raises(error):
             MakePiece.make_pieces(*args)
 
-    @pytest.mark.parametrize(
+    @ pytest.mark.parametrize(
         ("args, error"),
         [
             (["string", 0], RuntimeError),          # サイズが小さい場合

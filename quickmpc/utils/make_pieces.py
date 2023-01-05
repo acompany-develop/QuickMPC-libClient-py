@@ -3,8 +3,8 @@ import operator
 from dataclasses import dataclass
 from typing import List
 
-from .overload_tools import Dim1, Dim2, methoddispatch
 from ..exception import ArgmentError
+from .overload_tools import Dim1, Dim2, methoddispatch
 
 
 @dataclass(frozen=True)
@@ -50,8 +50,27 @@ class MakePiece:
 
     @make_pieces.register(Dim1)
     @staticmethod
-    def __make_pieces_1d(src: List[str], _) -> List[List[str]]:
-        return [src]
+    def __make_pieces_1d(src: List[str], max_size: int) -> List[List[str]]:
+        MakePiece.check_max_size(max_size)
+        cur_size = 0
+        index = 0
+        dst: List[List[str]] = [[]]
+        for val in src:
+            val_size = MakePiece.__get_byte(val)
+            if val_size > max_size:
+                raise RuntimeError(
+                    f"line size ({val_size}) is over "
+                    f"specified limit size ({max_size})"
+                )
+            cur_size += val_size
+            if cur_size > max_size:
+                cur_size = val_size
+                index += 1
+                dst.append([])
+
+            dst[index].append(val)
+
+        return dst
 
     @make_pieces.register(Dim2)
     @staticmethod
