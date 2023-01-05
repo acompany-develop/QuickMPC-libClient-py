@@ -1,15 +1,10 @@
-import ast
 import csv
 import glob
-import json
 from decimal import Decimal
 from typing import Any
 
 import numpy as np
 from natsort import natsorted
-
-from ..share import Share
-from .if_present import if_present
 
 
 def get_meta(job_uuid: str, path: str):
@@ -32,9 +27,9 @@ def get_result(job_uuid: str, path: str, party: int):
                     yield val
 
 
-def restore(job_uuid: str, path: str, party_size: int) -> any:
+def restore(job_uuid: str, path: str, party_size: int) -> Any:
     schema = []
-    result = []
+    result: Any = []
 
     column_number = get_meta(job_uuid, path)
     is_dim2 = True if len(

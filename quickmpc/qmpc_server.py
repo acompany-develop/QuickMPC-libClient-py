@@ -1,7 +1,5 @@
-import ast
 import csv
 import datetime
-import gc
 import hashlib
 import json
 import logging
@@ -11,7 +9,6 @@ import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field, InitVar
-from decimal import Decimal
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 from urllib.parse import urlparse
 
@@ -342,7 +339,8 @@ class QMPCServer:
                 elif res.HasField("is_schema"):
                     file_title = "schema"
 
-                file_path = f"{path}/{file_title}-{job_uuid}-{party}-{res.piece_id}.csv"
+                file_path = f"{path}/"
+                f"{file_title}-{job_uuid}-{party}-{res.piece_id}.csv"
                 with open(file_path, 'w') as f:
                     writer = csv.writer(f)
                     writer.writerow([res.column_number])
@@ -400,7 +398,6 @@ class QMPCServer:
                 column_number = 0
                 result: Any = []
                 schema = []
-                tmp = 0
                 for r in res:
                     if r.HasField("is_schema"):
                         if not is_table:
