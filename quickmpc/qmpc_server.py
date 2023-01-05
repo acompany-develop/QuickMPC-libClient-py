@@ -140,10 +140,28 @@ class QMPCServer:
         for res in stream:
             is_ok &= res.is_ok
             if path is not None:
-                file_path = f"{path}/{job_uuid}-{party}-{res.piece_id}"
-                with open(file_path, mode='w') as f:
-                    f.write(res.result)
-                res.result = GetComputationResultResponse().result
+                file_title = "dim1"
+                if res.HasField("is_dim2"):
+                    file_title = "dim2"
+                elif res.HasField("is_schema"):
+                    file_title = "schema"
+
+                file_path = f"{path}/" + \
+                    f"{file_title}-{job_uuid}-{party}-{res.piece_id}.csv"
+
+                with open(file_path, 'w') as f:
+                    writer = csv.writer(f)
+                    writer.writerow([res.column_number])
+                    writer.writerow(res.result)
+                progress = res.progress if res.HasField('progress') else None
+                res = GetComputationResultResponse(
+                    message=res.message,
+                    is_ok=res.is_ok,
+                    column_number=res.column_number,
+                    status=res.status,
+                    piece_id=res.piece_id,
+                    progress=progress,
+                )
             res_list.append(res)
         res_dict: Dict = {"is_ok": is_ok, "responses": res_list}
         return res_dict
@@ -324,40 +342,6 @@ class QMPCServer:
                             for res in response]) if is_ok else None
         return {"is_ok": is_ok, "elapsed_time": elapsed_time}
 
-    @staticmethod
-    def __stream_result_test(stream: Iterable, job_uuid: str, party: int,
-                             path: Optional[str]) -> Dict:
-        """ エラーチェックしてstreamのresultを得る """
-        is_ok: bool = True
-        res_list = []
-        for res in stream:
-            is_ok &= res.is_ok
-            if path is not None:
-                file_title = "dim1"
-                if res.HasField("is_dim2"):
-                    file_title = "dim2"
-                elif res.HasField("is_schema"):
-                    file_title = "schema"
-
-                file_path = f"{path}/"
-                f"{file_title}-{job_uuid}-{party}-{res.piece_id}.csv"
-                with open(file_path, 'w') as f:
-                    writer = csv.writer(f)
-                    writer.writerow([res.column_number])
-                    writer.writerow(res.result)
-                progress = res.progress if res.HasField('progress') else None
-                res = GetComputationResultResponse(
-                    message=res.message,
-                    is_ok=res.is_ok,
-                    column_number=res.column_number,
-                    status=res.status,
-                    piece_id=res.piece_id,
-                    progress=progress,
-                )
-            res_list.append(res)
-        res_dict: Dict = {"is_ok": is_ok, "responses": res_list}
-        return res_dict
-
     def get_computation_result(self, job_uuid: str,
                                path: Optional[str]) -> Dict:
         """ コンテナから結果を取得 """
@@ -368,7 +352,7 @@ class QMPCServer:
         )
         # 非同期にリクエスト送信
         executor = ThreadPoolExecutor()
-        futures = [executor.submit(QMPCServer.__stream_result_test,
+        futures = [executor.submit(QMPCServer.__stream_result,
                                    stub.GetComputationResult(req),
                                    job_uuid, party, path)
                    for party, stub in enumerate(self.__client_stubs)]
