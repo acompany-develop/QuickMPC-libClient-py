@@ -2,8 +2,8 @@ from typing import List
 
 import pytest
 
-from quickmpc.utils.make_pieces import MakePiece
 from quickmpc.exception import ArgmentError
+from quickmpc.utils.make_pieces import MakePiece
 
 
 class TestQMPC:

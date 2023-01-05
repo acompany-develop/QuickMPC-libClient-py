@@ -32,7 +32,7 @@ def get_result(job_uuid: str, path: str, party: int):
                     yield val
 
 
-def restore(job_uuid: str, path: str, party_size: int):
+def restore(job_uuid: str, path: str, party_size: int) -> any:
     schema = []
     result = []
 
@@ -54,7 +54,7 @@ def restore(job_uuid: str, path: str, party_size: int):
             itr += 1
 
     result_float = np.vectorize(float)(result)
-    result = np.array(result_float).reshape(-1,
-                                            column_number).tolist() if is_dim2 else result
+    result = np.array(result_float)\
+        .reshape(-1, column_number).tolist() if is_dim2 else result_float
     result = {"schema": schema, "table": result} if len(schema) else result
     return result
