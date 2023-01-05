@@ -22,7 +22,7 @@ class TestQMPC:
         actual = MakePiece.make_pieces(array, size)
         assert (actual == expected)
 
-    @ pytest.mark.parametrize(
+    @pytest.mark.parametrize(
         ("matrix, size, expected"),
         [
             (MATRIX, 75, [MATRIX]),
@@ -34,7 +34,7 @@ class TestQMPC:
         actual = MakePiece.make_pieces(matrix, size)
         assert (actual == expected)
 
-    @ pytest.mark.parametrize(
+    @pytest.mark.parametrize(
         ("string, size, expected"),
         [
             # 空文字列
@@ -58,7 +58,7 @@ class TestQMPC:
         actual = MakePiece.make_pieces(string, size)
         assert (actual == expected)
 
-    @ pytest.mark.parametrize(
+    @pytest.mark.parametrize(
         ("args, error"),
         [
             ([MATRIX, 0], RuntimeError),          # サイズが小さい場合
@@ -72,7 +72,7 @@ class TestQMPC:
         with pytest.raises(error):
             MakePiece.make_pieces(*args)
 
-    @ pytest.mark.parametrize(
+    @pytest.mark.parametrize(
         ("args, error"),
         [
             (["string", 0], RuntimeError),          # サイズが小さい場合
