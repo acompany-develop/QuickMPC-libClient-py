@@ -349,7 +349,7 @@ class QMPCServer:
                     writer.writerow([res.column_number])
                     writer.writerow(res.result)
                 progress = res.progress if res.HasField('progress') else None
-                res = GetComputationResultResponseTest(
+                res = GetComputationResultResponse(
                     message=res.message,
                     is_ok=res.is_ok,
                     column_number=res.column_number,
