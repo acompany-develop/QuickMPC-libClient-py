@@ -10,7 +10,7 @@ from decimal import Decimal
 import numpy as np
 
 def get_meta(job_uuid: str, path: str):
-    file_name = glob.glob(f"{path}/(dim1|dim2)-{job_uuid}-*")[0]
+    file_name = glob.glob(f"{path}/dim?-{job_uuid}-*")[0]
     with open(file_name, 'r') as f:
         reader = csv.reader(f)
         # 1列目のデータを取得
@@ -40,7 +40,7 @@ def restore(job_uuid: str, path: str, party_size: int):
                 schema.append(val)
 
         itr = 0
-        for val in get_result(job_uuid,f"{path}/(dim1|dim2)", party):
+        for val in get_result(job_uuid,f"{path}/dim?", party):
             if itr >= len(result):
                 result.append(Decimal(val))
             else:
