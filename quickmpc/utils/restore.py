@@ -9,76 +9,45 @@ from typing import Any
 from decimal import Decimal
 import numpy as np
 
+def get_meta(job_uuid: str, path: str):
+    file_name = glob.glob(f"{path}/(dim1|dim2)-{job_uuid}-*")[0]
+    with open(file_name, 'r') as f:
+        reader = csv.reader(f)
+        # 1列目のデータを取得
+        meta = next(reader)
+        return int(meta[0])
 
-def get_res(job_uuid, path, party):
-    schema = []
-    result = [[]]
-    for file_name in natsorted(glob.glob(f"{path}/schema-{job_uuid}-{party}-*")):
-        with open(file_name, 'r') as f:
+def get_result(job_uuid: str, path: str, party: int):
+    for file_name in natsorted(glob.glob(f"{path}-{job_uuid}-{party}-*")):
+        with open(file_name,'r') as f:
             reader = csv.reader(f)
+            # 1列目は読まない
             next(reader)
             for row in reader:
                 for val in row:
-                    schema.append(val)
-
-    tmp = 0
-    for file_name in natsorted(glob.glob(f"{path}/result-{job_uuid}-{party}-*")):
-        with open(file_name, 'r') as f:
-            reader = csv.reader(f)
-            row = next(reader)
-            row_number = int(row[0])
-            for row in reader:
-                for val in row:
-                    if tmp >= row_number:
-                        result.append([])
-                        tmp = 0
-                    result[-1].append(Decimal(val))
-                    tmp += 1
-
-    return schema, result
-
-
-def restore_test(job_uuid: str, path: str, party_size: int):
-    schema, result = get_res(job_uuid, path, 0)
-    row_number = 0
-    is_dim2 = 0
-    for party in range(1, party_size):
-        tmp = 0
-        row_num = 0
-        for file_name in natsorted(glob.glob(f"{path}/result-{job_uuid}-{party}-*")):
-            with open(file_name, 'r') as f:
-                reader = csv.reader(f)
-                row = next(reader)
-                row_number = int(row[0])
-                is_dim2 = int(row[1])
-                for row in reader:
-                    for val in row:
-                        if tmp >= row_number:
-                            tmp = 0
-                            row_num += 1
-                        result[row_num][tmp] += Decimal(val)
-                        tmp += 1
-    result = np.vectorize(float)(result).tolist()
-    result = result if is_dim2 else result[0]
-    res = result if len(schema) == 0 else \
-        {"schema": schema, "table": result}
-    return res
-
+                    yield val
 
 def restore(job_uuid: str, path: str, party_size: int):
-    results: Any
-    for party in range(party_size):
-        res = ""
-        for file in natsorted(glob.glob(f"{path}/{job_uuid}-{party}*")):
-            with open(file, 'r') as f:
-                res += f.read()
+    schema=[]
+    result=[]
 
+    column_number = get_meta(job_uuid,path)
+    is_dim2 = True if len(glob.glob(f"{path}/dim2-{job_uuid}-*")) != 0 else False
+
+    for party in range(party_size):
         if party == 0:
-            results = json.loads(ast.literal_eval(res))
-        elif party == party_size-1:
-            results = if_present([results, json.loads(
-                ast.literal_eval(res))], Share.recons)
-        else:
-            results = if_present([results, json.loads(
-                ast.literal_eval(res))], Share.recons, Decimal)
-    return results
+            for val in get_result(job_uuid,f"{path}/schema", party):
+                schema.append(val)
+
+        itr = 0
+        for val in get_result(job_uuid,f"{path}/(dim1|dim2)", party):
+            if itr >= len(result):
+                result.append(Decimal(val))
+            else:
+                result[itr]+=Decimal(val)
+            itr+=1
+
+    result_float = np.vectorize(float)(result)
+    result = np.array(result_float).reshape(-1,column_number).tolist() if is_dim2 else result
+    result = {"schema":schema,"table":result} if len(schema) else result
+    return result
