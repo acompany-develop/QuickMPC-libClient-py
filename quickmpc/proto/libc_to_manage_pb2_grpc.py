@@ -61,11 +61,6 @@ class LibcToManageStub(object):
             request_serializer=libc__to__manage__pb2.GetElapsedTimeRequest.SerializeToString,
             response_deserializer=libc__to__manage__pb2.GetElapsedTimeResponse.FromString,
         )
-        self.GetComputationResultTest = channel.unary_stream(
-            '/libctomanage.LibcToManage/GetComputationResultTest',
-            request_serializer=libc__to__manage__pb2.GetComputationResultRequest.SerializeToString,
-            response_deserializer=libc__to__manage__pb2.GetComputationResultResponseTest.FromString,
-        )
 
 
 class LibcToManageServicer(object):
@@ -127,12 +122,6 @@ class LibcToManageServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def GetComputationResultTest(self, request, context):
-        """Missing associated documentation comment in .proto file."""
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details('Method not implemented!')
-        raise NotImplementedError('Method not implemented!')
-
 
 def add_LibcToManageServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -180,11 +169,6 @@ def add_LibcToManageServicer_to_server(servicer, server):
             servicer.GetElapsedTime,
             request_deserializer=libc__to__manage__pb2.GetElapsedTimeRequest.FromString,
             response_serializer=libc__to__manage__pb2.GetElapsedTimeResponse.SerializeToString,
-        ),
-        'GetComputationResultTest': grpc.unary_stream_rpc_method_handler(
-            servicer.GetComputationResultTest,
-            request_deserializer=libc__to__manage__pb2.GetComputationResultRequest.FromString,
-            response_serializer=libc__to__manage__pb2.GetComputationResultResponseTest.SerializeToString,
         ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -351,20 +335,3 @@ class LibcToManage(object):
                                              libc__to__manage__pb2.GetElapsedTimeResponse.FromString,
                                              options, channel_credentials,
                                              insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
-
-    @staticmethod
-    def GetComputationResultTest(request,
-                                 target,
-                                 options=(),
-                                 channel_credentials=None,
-                                 call_credentials=None,
-                                 insecure=False,
-                                 compression=None,
-                                 wait_for_ready=None,
-                                 timeout=None,
-                                 metadata=None):
-        return grpc.experimental.unary_stream(request, target, '/libctomanage.LibcToManage/GetComputationResultTest',
-                                              libc__to__manage__pb2.GetComputationResultRequest.SerializeToString,
-                                              libc__to__manage__pb2.GetComputationResultResponseTest.FromString,
-                                              options, channel_credentials,
-                                              insecure, call_credentials, compression, wait_for_ready, timeout, metadata)
