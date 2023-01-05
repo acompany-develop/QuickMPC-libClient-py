@@ -1,13 +1,16 @@
 import ast
-import json
-import glob
 import csv
+import glob
+import json
+from decimal import Decimal
+from typing import Any
+
+import numpy as np
+from natsort import natsorted
+
 from ..share import Share
 from .if_present import if_present
-from natsort import natsorted
-from typing import Any
-from decimal import Decimal
-import numpy as np
+
 
 def get_meta(job_uuid: str, path: str):
     file_name = glob.glob(f"{path}/dim?-{job_uuid}-*")[0]
@@ -17,9 +20,10 @@ def get_meta(job_uuid: str, path: str):
         meta = next(reader)
         return int(meta[0])
 
+
 def get_result(job_uuid: str, path: str, party: int):
     for file_name in natsorted(glob.glob(f"{path}-{job_uuid}-{party}-*")):
-        with open(file_name,'r') as f:
+        with open(file_name, 'r') as f:
             reader = csv.reader(f)
             # 1列目は読まない
             next(reader)
@@ -27,27 +31,30 @@ def get_result(job_uuid: str, path: str, party: int):
                 for val in row:
                     yield val
 
-def restore(job_uuid: str, path: str, party_size: int):
-    schema=[]
-    result=[]
 
-    column_number = get_meta(job_uuid,path)
-    is_dim2 = True if len(glob.glob(f"{path}/dim2-{job_uuid}-*")) != 0 else False
+def restore(job_uuid: str, path: str, party_size: int):
+    schema = []
+    result = []
+
+    column_number = get_meta(job_uuid, path)
+    is_dim2 = True if len(
+        glob.glob(f"{path}/dim2-{job_uuid}-*")) != 0 else False
 
     for party in range(party_size):
         if party == 0:
-            for val in get_result(job_uuid,f"{path}/schema", party):
+            for val in get_result(job_uuid, f"{path}/schema", party):
                 schema.append(val)
 
         itr = 0
-        for val in get_result(job_uuid,f"{path}/dim?", party):
+        for val in get_result(job_uuid, f"{path}/dim?", party):
             if itr >= len(result):
                 result.append(Decimal(val))
             else:
-                result[itr]+=Decimal(val)
-            itr+=1
+                result[itr] += Decimal(val)
+            itr += 1
 
     result_float = np.vectorize(float)(result)
-    result = np.array(result_float).reshape(-1,column_number).tolist() if is_dim2 else result
-    result = {"schema":schema,"table":result} if len(schema) else result
+    result = np.array(result_float).reshape(-1,
+                                            column_number).tolist() if is_dim2 else result
+    result = {"schema": schema, "table": result} if len(schema) else result
     return result
