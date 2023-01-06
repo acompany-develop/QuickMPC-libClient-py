@@ -1,9 +1,16 @@
+from dataclasses import dataclass
+
+from .proto.common_types.common_types_pb2 import JobErrorInfo
+
+
+@dataclass(frozen=True)
 class QMPCJobError(Exception):
-    pass
+    err_info: JobErrorInfo
 
 
+@dataclass(frozen=True)
 class QMPCServerError(Exception):
-    pass
+    err_info: JobErrorInfo
 
 
 class ArgmentError(Exception):
