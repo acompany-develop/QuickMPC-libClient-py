@@ -1,4 +1,4 @@
-import ast
+import csv
 import datetime
 import hashlib
 import json
@@ -9,25 +9,26 @@ import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field, InitVar
-from typing import Dict, Iterable, List, Tuple, Optional
+from typing import Any, Dict, Iterable, List, Optional, Tuple
 from urllib.parse import urlparse
 
 import grpc
+import numpy as np
 import tqdm  # type: ignore
 from grpc_status import rpc_status  # type: ignore
 
-from .proto.common_types.common_types_pb2 import JobStatus, JobErrorInfo
+from .exception import ArgmentError, QMPCJobError, QMPCServerError
+from .proto.common_types.common_types_pb2 import JobErrorInfo, JobStatus
 from .proto.libc_to_manage_pb2 import (DeleteSharesRequest,
                                        ExecuteComputationRequest,
                                        GetComputationResultRequest,
-                                       GetDataListRequest, Input, JoinOrder,
+                                       GetComputationResultResponse,
+                                       GetDataListRequest,
+                                       GetElapsedTimeRequest, Input, JoinOrder,
                                        PredictRequest, SendModelParamRequest,
-                                       SendSharesRequest,
-                                       GetElapsedTimeRequest,
-                                       GetComputationResultResponse)
+                                       SendSharesRequest)
 from .proto.libc_to_manage_pb2_grpc import LibcToManageStub
 from .share import Share
-from .exception import ArgmentError, QMPCJobError, QMPCServerError
 from .utils.if_present import if_present
 from .utils.make_pieces import MakePiece
 from .utils.overload_tools import Dim2, Dim3, methoddispatch
@@ -139,10 +140,28 @@ class QMPCServer:
         for res in stream:
             is_ok &= res.is_ok
             if path is not None:
-                file_path = f"{path}/{job_uuid}-{party}-{res.piece_id}"
-                with open(file_path, mode='w') as f:
-                    f.write(res.result)
-                res.result = GetComputationResultResponse().result
+                file_title = "dim1"
+                if res.HasField("is_dim2"):
+                    file_title = "dim2"
+                elif res.HasField("is_schema"):
+                    file_title = "schema"
+
+                file_path = f"{path}/" + \
+                    f"{file_title}-{job_uuid}-{party}-{res.piece_id}.csv"
+
+                with open(file_path, 'w') as f:
+                    writer = csv.writer(f)
+                    writer.writerow([res.column_number])
+                    writer.writerow(res.result)
+                progress = res.progress if res.HasField('progress') else None
+                res = GetComputationResultResponse(
+                    message=res.message,
+                    is_ok=res.is_ok,
+                    column_number=res.column_number,
+                    status=res.status,
+                    piece_id=res.piece_id,
+                    progress=progress,
+                )
             res_list.append(res)
         res_dict: Dict = {"is_ok": is_ok, "responses": res_list}
         return res_dict
@@ -241,52 +260,6 @@ class QMPCServer:
 
         return {"is_ok": is_ok, "job_uuid": job_uuid}
 
-    def get_computation_result(self, job_uuid: str,
-                               path: Optional[str]) -> Dict:
-        """ コンテナから結果を取得 """
-        # リクエストパラメータを設定
-        req = GetComputationResultRequest(
-            job_uuid=job_uuid,
-            token=self.token
-        )
-        # 非同期にリクエスト送信
-        executor = ThreadPoolExecutor()
-        futures = [executor.submit(QMPCServer.__stream_result,
-                                   stub.GetComputationResult(req),
-                                   job_uuid, party, path)
-                   for party, stub in enumerate(self.__client_stubs)]
-        is_ok, response = QMPCServer.__futures_result(
-            futures, enable_progress_bar=False)
-
-        results_sorted = [sorted(res["responses"], key=lambda r: r.piece_id)
-                          for res in response]
-
-        # NOTE: statusは0番目(piece_id=1)の要素にのみ含まれている
-        statuses = [res[0].status for res in results_sorted] \
-            if results_sorted else None
-        all_completed = all([
-            s == JobStatus.Value('COMPLETED') for s in statuses
-        ]) if statuses is not None else False
-
-        progresses = None
-        if results_sorted is not None:
-            progresses = [
-                res[0].progress if res[0].HasField("progress") else None
-                for res in results_sorted
-            ]
-
-        # piece_id順にresultを結合
-        results_str = ["".join(map(lambda r: r.result, res))
-                       for res in results_sorted]
-        results = [json.loads(ast.literal_eval(r))
-                   for r in results_str
-                   ] if all_completed and path is None else None
-
-        # reconsして返す
-        results = if_present(results, Share.recons)
-        return {"is_ok": is_ok, "statuses": statuses,
-                "results": results, "progresses": progresses}
-
     def send_model_params(self, params: list,
                           piece_size: int) -> Dict:
         if piece_size < 1000 or piece_size > 1_000_000:
@@ -297,9 +270,8 @@ class QMPCServer:
         # リクエストパラメータを設定
         job_uuid: str = str(uuid.uuid4())
         params_share: list = Share.sharize(params, self.__party_size)
-
         params_share_pieces: list = [MakePiece.make_pieces(
-            json.dumps(p), piece_size) for p in params_share]
+            p, piece_size) for p in params_share]
 
         # 非同期にリクエスト送信
         executor = ThreadPoolExecutor()
@@ -369,3 +341,70 @@ class QMPCServer:
         elapsed_time = max([res.elapsed_time
                             for res in response]) if is_ok else None
         return {"is_ok": is_ok, "elapsed_time": elapsed_time}
+
+    def get_computation_result(self, job_uuid: str,
+                               path: Optional[str]) -> Dict:
+        """ コンテナから結果を取得 """
+        # リクエストパラメータを設定
+        req = GetComputationResultRequest(
+            job_uuid=job_uuid,
+            token=self.token
+        )
+        # 非同期にリクエスト送信
+        executor = ThreadPoolExecutor()
+        futures = [executor.submit(QMPCServer.__stream_result,
+                                   stub.GetComputationResult(req),
+                                   job_uuid, party, path)
+                   for party, stub in enumerate(self.__client_stubs)]
+        is_ok, response = QMPCServer.__futures_result(
+            futures, enable_progress_bar=False)
+        results_sorted = [sorted(res["responses"], key=lambda r: r.piece_id)
+                          for res in response]
+        # NOTE: statusは0番目(piece_id=1)の要素にのみ含まれている
+        statuses = [res[0].status for res in results_sorted] \
+            if results_sorted else None
+        all_completed = all([
+            s == JobStatus.Value('COMPLETED') for s in statuses
+        ]) if statuses is not None else False
+
+        progresses = None
+        if results_sorted is not None:
+            progresses = [
+                res[0].progress if res[0].HasField("progress") else None
+                for res in results_sorted
+            ]
+
+        results: Optional[Any] = None
+        if not path and all_completed:
+            for res in results_sorted:
+                is_table = False
+                is_dim2 = False
+                column_number = 0
+                result: Any = []
+                schema = []
+                for r in res:
+                    if r.HasField("is_schema"):
+                        if not is_table:
+                            is_table = True
+                        for val in r.result:
+                            schema.append(val)
+                    else:
+                        if r.HasField("is_dim2"):
+                            is_dim2 = True
+                        for val in r.result:
+                            result.append(val)
+
+                    column_number = r.column_number
+
+                if is_dim2:
+                    result = np.array(result).reshape(-1,
+                                                      column_number).tolist()
+                result = {"schema": schema, "table": result} if is_table \
+                    else result
+                if results is None:
+                    results = []
+                results.append(result)
+
+        results = if_present(results, Share.recons)
+        return {"is_ok": is_ok, "statuses": statuses,
+                "results": results, "progresses": progresses}

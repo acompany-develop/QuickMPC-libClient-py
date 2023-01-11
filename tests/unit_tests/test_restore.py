@@ -11,7 +11,7 @@ class TestQMPC:
         "token_demo"
     )
 
-    def test_restore(self):
+    def test_restore(self, run_server1, run_server2, run_server3):
         """ファイルに書き出し、復元できるかテスト"""
         job_id: str = "uuid"
         path = "./tests/unit_tests/"

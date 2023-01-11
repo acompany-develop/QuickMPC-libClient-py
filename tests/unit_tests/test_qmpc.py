@@ -2,7 +2,7 @@ from typing import Any, Dict
 
 import pytest
 
-from quickmpc.exception import ArgmentError, QMPCServerError, QMPCJobError
+from quickmpc.exception import ArgmentError, QMPCJobError, QMPCServerError
 from quickmpc.qmpc_server import QMPCServer
 
 
@@ -105,7 +105,7 @@ class TestQMPC:
     def test_send_model_params(self, run_server1, run_server2, run_server3):
         """ serverにモデルパラメータを送れるかのTest"""
         res: Dict[str, Any] = self.qmpc.send_model_params(
-            [[1, 2, 3]], 1000)
+            [1, 2, 3], 1000)
         assert (res["is_ok"])
 
     def test_send_model_params_errorhandring(self, run_server1,
@@ -113,11 +113,11 @@ class TestQMPC:
         with pytest.raises(RuntimeError):
             # piece_sizeが1000より小さい
             self.qmpc.send_model_params(
-                [[1, 2, 3]], 500)
+                [1, 2, 3], 500)
         with pytest.raises(RuntimeError):
             # piece_sizeが1000000より大きい
             self.qmpc.send_model_params(
-                [[1, 2, 3]], 10000000)
+                [1, 2, 3], 10000000)
 
     def test_predict(self, run_server1, run_server2, run_server3):
         """ serverにモデル値予測リクエストを送れるかのTest """

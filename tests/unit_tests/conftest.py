@@ -2,9 +2,11 @@
 ローカルでhttpsサーバを3台立てており，
 yieldのタイミングで全てのTestが開始
 """
-import pytest
-import os
 import glob
+import os
+
+import pytest
+
 from .local_server import serve
 
 
@@ -18,7 +20,7 @@ def run_server1():
     yield
 
     """ test end """
-    for file in glob.glob("./tests/unit_tests/uuid*"):
+    for file in glob.glob("./tests/unit_tests/dim1-uuid*"):
         os.remove(file)
 
     server.stop(0)
