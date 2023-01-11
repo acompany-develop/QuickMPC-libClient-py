@@ -1,9 +1,16 @@
+from dataclasses import dataclass
+from typing import Union
+from google.protobuf.reflection import GeneratedProtocolMessageType
+
+
+@dataclass(frozen=True)
 class QMPCJobError(Exception):
-    pass
+    err_info: GeneratedProtocolMessageType
 
 
+@dataclass(frozen=True)
 class QMPCServerError(Exception):
-    pass
+    err_info: Union[str, GeneratedProtocolMessageType]
 
 
 class ArgmentError(Exception):
