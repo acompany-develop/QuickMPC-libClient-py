@@ -2,13 +2,25 @@ from typing import List
 
 import pytest
 
-from quickmpc.utils.make_pieces import MakePiece
 from quickmpc.exception import ArgmentError
+from quickmpc.utils.make_pieces import MakePiece
 
 
 class TestQMPC:
 
     MATRIX: List[List[str]] = [[str(i) * i for i in range(1, 6)]] * 5
+
+    @pytest.mark.parametrize(
+        ("array, size, expected"),
+        [
+            (["1", "2", "3", "4"], 4, [["1", "2", "3", "4"]]),
+            (["1", "2", "3", "4"], 3, [["1", "2", "3"], ["4"]]),
+            (["1", "2", "3", "4"], 2, [["1", "2"], ["3", "4"]]),
+        ]
+    )
+    def test_make_pieces_array(self, array, size, expected):
+        actual = MakePiece.make_pieces(array, size)
+        assert (actual == expected)
 
     @pytest.mark.parametrize(
         ("matrix, size, expected"),
