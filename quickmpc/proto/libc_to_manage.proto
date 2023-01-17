@@ -22,13 +22,18 @@ service LibcToManage {
     rpc GetJobErrorInfo(GetJobErrorInfoRequest) returns (GetJobErrorInfoResponse) {}                 // stacktrace取得リクエスト
 }
 
+message ColumnSchema {
+    string name = 1;
+    pb_common_types.ShareValueTypeEnum type = 2;
+}
+
 /**
  * the message of SendSharesRequest
 */
 message SendSharesRequest {
     string data_id = 1;
     string shares = 2;
-    repeated string schema = 3;
+    repeated ColumnSchema schema = 3;
     int32 piece_id = 4;
     string sent_at = 5;
     int32 matching_column = 6;

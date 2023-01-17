@@ -17,23 +17,24 @@ import numpy as np
 import tqdm  # type: ignore
 from grpc_status import rpc_status  # type: ignore
 
-from .exception import ArgmentError, QMPCJobError, QMPCServerError
-from .proto.common_types.common_types_pb2 import JobErrorInfo, JobStatus
+from .proto.common_types.common_types_pb2 import JobStatus, JobErrorInfo
 from .proto.libc_to_manage_pb2 import (DeleteSharesRequest,
                                        ExecuteComputationRequest,
                                        GetComputationResultRequest,
-                                       GetComputationResultResponse,
-                                       GetDataListRequest,
-                                       GetElapsedTimeRequest, Input, JoinOrder,
+                                       GetDataListRequest, Input, JoinOrder,
                                        PredictRequest, SendModelParamRequest,
                                        SendSharesRequest,
-                                       GetJobErrorInfoRequest)
+                                       GetJobErrorInfoRequest,
+                                       ColumnSchema as ColumnSchemaPb,
+                                       GetElapsedTimeRequest,
+                                       GetComputationResultResponse)
 from .proto.libc_to_manage_pb2_grpc import LibcToManageStub
 from .share import Share
+from .exception import ArgmentError, QMPCJobError, QMPCServerError
 from .utils.if_present import if_present
 from .utils.make_pieces import MakePiece
 from .utils.overload_tools import Dim2, Dim3, methoddispatch
-from .utils.parse_csv import format_check
+from .utils.parse_csv import format_check, ColumnSchema
 
 abs_file = os.path.abspath(__file__)
 base_dir = os.path.dirname(abs_file)
@@ -75,7 +76,7 @@ class QMPCServer:
 
     @staticmethod
     def _argument_check(join_order: Tuple[List, List, List]):
-        if len(join_order[0])-1 != len(join_order[1]):
+        if len(join_order[0]) - 1 != len(join_order[1]):
             logger.error(
                 'the size of join must be one less than the size of dataIds')
             return False
@@ -173,7 +174,7 @@ class QMPCServer:
 
     @send_share.register(Dim2)
     @send_share.register(Dim3)
-    def __send_share_impl(self, secrets: List, schema: List[str],
+    def __send_share_impl(self, secrets: List, schema: List[ColumnSchema],
                           matching_column: int,
                           piece_size: int) -> Dict:
         if piece_size < 1000 or piece_size > 1_000_000:
@@ -202,13 +203,19 @@ class QMPCServer:
                   for s in tqdm.tqdm(pieces, desc='sharize')]
         sent_at = str(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
+        schema_pb = [ColumnSchemaPb(
+            name=col[0],
+            type=col[1]
+        )
+            for col in schema]
+
         # リクエストパラメータを設定して非同期にリクエスト送信
         executor = ThreadPoolExecutor()
         futures = [executor.submit(stub.SendShares,
                                    SendSharesRequest(
                                        data_id=data_id,
                                        shares=json.dumps(s),
-                                       schema=schema,
+                                       schema=schema_pb,
                                        piece_id=piece_id,
                                        sent_at=sent_at,
                                        matching_column=matching_column,

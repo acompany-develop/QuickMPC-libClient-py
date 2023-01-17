@@ -35,6 +35,12 @@ enum PredictMethod {
     PREDICT_METHOD_SID3_TREE = 4;
 }
 
+enum ShareValueTypeEnum {
+    SHARE_VALUE_TYPE_UNSPECIFIED = 0;
+    SHARE_VALUE_TYPE_FIXED_POINT = 1;
+    SHARE_VALUE_TYPE_UTF_8_INTEGER_REPRESENTATION = 2;
+}
+
 message ProcedureProgress {
     uint64 id = 1;                // unique id in ProgressManager context
     string description = 2;       // describe specific process in job
