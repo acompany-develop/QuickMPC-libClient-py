@@ -85,6 +85,7 @@ def methoddispatch(is_static_method: bool = False):
             if func is None:
                 return lambda f: register(types, f)
             registry[types] = func
+            return func
 
         wrapper.register = register
         update_wrapper(wrapper, func)
