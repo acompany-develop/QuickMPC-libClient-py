@@ -26,7 +26,8 @@ from .proto.libc_to_manage_pb2 import (DeleteSharesRequest,
                                        GetDataListRequest,
                                        GetElapsedTimeRequest, Input, JoinOrder,
                                        PredictRequest, SendModelParamRequest,
-                                       SendSharesRequest,GetJobErrorInfoRequest)
+                                       SendSharesRequest,
+                                       GetJobErrorInfoRequest)
 from .proto.libc_to_manage_pb2_grpc import LibcToManageStub
 from .share import Share
 from .utils.if_present import if_present
