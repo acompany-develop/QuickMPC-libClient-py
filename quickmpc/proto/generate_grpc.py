@@ -14,6 +14,8 @@ def generate_files():
             "-I.",
             "--python_out=.",
             "--grpc_python_out=.",
+            "--mypy_out=.",
+            "--mypy_grpc_out=.",
             "./libc_to_manage.proto",
         )
     )
@@ -22,6 +24,7 @@ def generate_files():
             "",
             "-I.",
             "--python_out=.",
+            "--mypy_out=.",
             "./common_types/common_types.proto",
         )
     )

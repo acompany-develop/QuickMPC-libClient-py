@@ -13,11 +13,11 @@ from .utils.parse_csv import (parse, parse_csv, parse_csv_to_bitvector,
 
 logger = logging.getLogger(__name__)
 # qmpc.JobStatus でアクセスできるようにエイリアスを設定する
-JobStatus: enum_type_wrapper.EnumTypeWrapper \
+JobStatus \
     = common_types_pb2.JobStatus
-ComputationMethod: enum_type_wrapper.EnumTypeWrapper \
+ComputationMethod \
     = common_types_pb2.ComputationMethod
-PredictMethod: enum_type_wrapper.EnumTypeWrapper \
+PredictMethod \
     = common_types_pb2.PredictMethod
 JobErrorInfo = common_types_pb2.JobErrorInfo
 
