@@ -5,11 +5,12 @@ from typing import Dict, List, Tuple, Optional
 from google.protobuf.internal import enum_type_wrapper
 
 from .proto.common_types import common_types_pb2
+from .proto import libc_to_manage_pb2
 from .qmpc_server import QMPCServer
 from .share import Share
 from .utils.restore import restore
 from .utils.parse_csv import (parse, parse_csv, parse_csv_to_bitvector,
-                              parse_to_bitvector, ShareValueType, ColumnSchema)
+                              parse_to_bitvector, ShareValueType)
 
 logger = logging.getLogger(__name__)
 # qmpc.JobStatus でアクセスできるようにエイリアスを設定する
@@ -20,6 +21,7 @@ ComputationMethod \
 PredictMethod \
     = common_types_pb2.PredictMethod
 JobErrorInfo = common_types_pb2.JobErrorInfo
+ColumnSchema = libc_to_manage_pb2.ColumnSchema
 
 
 @dataclass(frozen=True)

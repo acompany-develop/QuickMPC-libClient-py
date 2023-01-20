@@ -7,6 +7,7 @@ import os
 import struct
 import time
 import uuid
+from decimal import Decimal
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field, InitVar
 from typing import Any, Dict, Iterable, List, Optional, Tuple
@@ -16,6 +17,7 @@ import grpc
 import numpy as np
 import tqdm  # type: ignore
 from grpc_status import rpc_status  # type: ignore
+import google.protobuf.json_format
 
 from .proto.common_types.common_types_pb2 import JobStatus, JobErrorInfo
 from .proto.libc_to_manage_pb2 import (DeleteSharesRequest,
@@ -25,7 +27,7 @@ from .proto.libc_to_manage_pb2 import (DeleteSharesRequest,
                                        PredictRequest, SendModelParamRequest,
                                        SendSharesRequest,
                                        GetJobErrorInfoRequest,
-                                       ColumnSchema as ColumnSchemaPb,
+                                       ColumnSchema,
                                        GetElapsedTimeRequest,
                                        GetComputationResultResponse)
 from .proto.libc_to_manage_pb2_grpc import LibcToManageStub
@@ -34,7 +36,7 @@ from .exception import ArgmentError, QMPCJobError, QMPCServerError
 from .utils.if_present import if_present
 from .utils.make_pieces import MakePiece
 from .utils.overload_tools import Dim2, Dim3, methoddispatch
-from .utils.parse_csv import format_check, ColumnSchema
+from .utils.parse_csv import format_check
 
 abs_file = os.path.abspath(__file__)
 base_dir = os.path.dirname(abs_file)
@@ -203,19 +205,13 @@ class QMPCServer:
                   for s in tqdm.tqdm(pieces, desc='sharize')]
         sent_at = str(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
-        schema_pb = [ColumnSchemaPb(
-            name=col[0],
-            type=col[1]
-        )
-            for col in schema]
-
         # リクエストパラメータを設定して非同期にリクエスト送信
         executor = ThreadPoolExecutor()
         futures = [executor.submit(stub.SendShares,
                                    SendSharesRequest(
                                        data_id=data_id,
                                        shares=json.dumps(s),
-                                       schema=schema_pb,
+                                       schema=schema,
                                        piece_id=piece_id,
                                        sent_at=sent_at,
                                        matching_column=matching_column,
@@ -383,19 +379,23 @@ class QMPCServer:
             ]
 
         results: Optional[Any] = None
+        schema = None
+        is_table = False
         if not path and all_completed:
             for res in results_sorted:
-                is_table = False
                 is_dim2 = False
                 column_number = 0
                 result: Any = []
-                schema = []
+                schema_1p = []
                 for r in res:
                     if r.HasField("is_schema"):
                         if not is_table:
                             is_table = True
                         for val in r.result:
-                            schema.append(val)
+                            col_sch = google.protobuf.json_format.Parse(
+                                val, ColumnSchema())
+                            schema_1p.append(col_sch)
+                            # schema = col_sch
                     else:
                         if r.HasField("is_dim2"):
                             is_dim2 = True
@@ -407,13 +407,17 @@ class QMPCServer:
                 if is_dim2:
                     result = np.array(result).reshape(-1,
                                                       column_number).tolist()
-                result = {"schema": schema, "table": result} if is_table \
-                    else result
+                if len(schema_1p) != 0:
+                    schema = schema_1p
+                result = Share.convert_type(result, schema)
                 if results is None:
                     results = []
                 results.append(result)
 
         results = if_present(results, Share.recons)
+        results = if_present(results, Share.convert_type, schema)
+        if is_table:
+            results = {"schema": schema, "table": results}
         return {"is_ok": is_ok, "statuses": statuses,
                 "results": results, "progresses": progresses}
 
