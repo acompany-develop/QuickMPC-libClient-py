@@ -411,15 +411,13 @@ class QMPCServer:
 
     def get_job_error_info(self, job_uuid: str):
         # リクエストパラメータを設定
-        req = GetComputationResultRequest(
+        req = GetJobErrorInfoRequest(
             job_uuid=job_uuid,
             token=self.token
         )
         # 非同期にリクエスト送信
         executor = ThreadPoolExecutor()
-        futures = [executor.submit(stub.GetJobErrorInfo,
-                                   GetJobErrorInfoRequest(job_uuid=job_uuid,
-                                                         token=self.token))
+        futures = [executor.submit(stub.GetJobErrorInfo, req)
                    for stub in self.__client_stubs]
         is_ok, response = QMPCServer.__futures_result(
             futures, enable_progress_bar=False)
