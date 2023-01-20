@@ -173,3 +173,7 @@ class TestQMPC:
         """ serverにシェアを送れるかのTest"""
         response: Dict[str, Any] = self.qmpc.get_data_list()
         assert (response["is_ok"])
+
+    def test_get_job_error_info(self, run_server1, run_server2, run_server3):
+        # 例外がthrowされないことをテスト
+        self.qmpc.get_job_error_info("test")
