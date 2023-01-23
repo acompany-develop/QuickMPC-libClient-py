@@ -272,10 +272,10 @@ class QMPC:
                     f"[path]={path}")
         return restore(job_id, path, self.__party_size)
 
-    def get_job_error_info(self, job_id: str):
+    def get_job_error_info(self, job_id: str) -> Dict:
         logger.info("get_job_error_info request. "
                     f"[job_id]={job_id}")
-        self.__qmpc_server.get_job_error_info(job_id)
+        return self.__qmpc_server.get_job_error_info(job_id)
 
     @staticmethod
     def set_log_level(level: int):

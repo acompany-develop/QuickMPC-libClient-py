@@ -410,7 +410,7 @@ class QMPCServer:
         return {"is_ok": is_ok, "statuses": statuses,
                 "results": results, "progresses": progresses}
 
-    def get_job_error_info(self, job_uuid: str):
+    def get_job_error_info(self, job_uuid: str) -> Dict:
         # リクエストパラメータを設定
         req = GetJobErrorInfoRequest(
             job_uuid=job_uuid,
@@ -422,9 +422,10 @@ class QMPCServer:
                    for stub in self.__client_stubs]
         is_ok, response = QMPCServer.__futures_result(
             futures, enable_progress_bar=False)
-        for res in response:
-            if res.job_error_info.HasField("stacktrace"):
-                logger.info(f"job error information: {res.job_error_info}")
-                return
 
-        raise RuntimeError("there is no job error info")
+        job_error_info = [
+            res.job_error_info if res.HasField("job_error_info") else None
+            for res in response
+        ]
+
+        return {"is_ok": is_ok, "job_error_info": job_error_info}
