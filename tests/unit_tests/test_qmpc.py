@@ -176,4 +176,8 @@ class TestQMPC:
 
     def test_get_job_error_info(self, run_server1, run_server2, run_server3):
         # 例外がthrowされないことをテスト
-        self.qmpc.get_job_error_info("test")
+        response: Dict[str, Any] = self.qmpc.get_job_error_info("test")
+
+        assert (response["is_ok"])
+        for res in response["job_error_info"]:
+            assert (res.what == "QMPCJobError")
