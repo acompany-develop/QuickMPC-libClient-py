@@ -19,7 +19,7 @@ service LibcToManage {
     rpc Predict(PredictRequest) returns (PredictResponse) {}                                         // モデル値予測リクエスト
     rpc GetDataList(GetDataListRequest) returns (GetDataListResponse) {}                             // data一覧取得リクエスト
     rpc GetElapsedTime(GetElapsedTimeRequest) returns (GetElapsedTimeResponse) {}                    // 計算時間取得リクエスト
-    rpc GetJobErrorInfo(GetJobErrorInfoRequest) returns (GetJobErrorInfoResponse) {}                       // stacktrace取得リクエスト
+    rpc GetJobErrorInfo(GetJobErrorInfoRequest) returns (GetJobErrorInfoResponse) {}                 // stacktrace取得リクエスト
 }
 
 /**
@@ -193,6 +193,6 @@ message GetJobErrorInfoRequest {
 }
 
 message GetJobErrorInfoResponse {
-    pb_common_types.JobErrorInfo job_error_info = 1;
+    optional pb_common_types.JobErrorInfo job_error_info = 1;
     bool is_ok = 2;
 }
