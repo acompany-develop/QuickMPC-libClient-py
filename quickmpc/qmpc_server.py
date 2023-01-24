@@ -7,7 +7,6 @@ import os
 import struct
 import time
 import uuid
-from decimal import Decimal
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field, InitVar
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
@@ -19,7 +18,9 @@ import tqdm  # type: ignore
 from grpc_status import rpc_status  # type: ignore
 import google.protobuf.json_format
 
-from .proto.common_types.common_types_pb2 import JobStatus, JobErrorInfo, ShareValueTypeEnum
+from .proto.common_types.common_types_pb2 import (JobStatus,
+                                                  JobErrorInfo,
+                                                  ShareValueTypeEnum)
 from .proto.libc_to_manage_pb2 import (DeleteSharesRequest,
                                        ExecuteComputationRequest,
                                        GetComputationResultRequest,
@@ -183,8 +184,10 @@ class QMPCServer:
     @__convert_schema.register((Dim1, str))
     @staticmethod
     def __convert_schema_str(schema: List[str]) -> List[ColumnSchema]:
-        return [ColumnSchema(
-            name=name, type=ShareValueTypeEnum.SHARE_VALUE_TYPE_FIXED_POINT) for name in schema]
+        return [
+            ColumnSchema(name=name,
+                         type=ShareValueTypeEnum.SHARE_VALUE_TYPE_FIXED_POINT)
+            for name in schema]
 
     @__convert_schema.register((Dim1, ColumnSchema))
     @staticmethod
@@ -198,7 +201,8 @@ class QMPCServer:
 
     @send_share.register(Dim2)
     @send_share.register(Dim3)
-    def __send_share_impl(self, secrets: List, schema: List[Union[str, ColumnSchema]],
+    def __send_share_impl(self, secrets: List,
+                          schema: List[Union[str, ColumnSchema]],
                           matching_column: int,
                           piece_size: int) -> Dict:
         if piece_size < 1000 or piece_size > 1_000_000:

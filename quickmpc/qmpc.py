@@ -2,8 +2,6 @@ import logging
 from dataclasses import dataclass, field, InitVar
 from typing import Dict, List, Tuple, Optional
 
-from google.protobuf.internal import enum_type_wrapper
-
 from .proto.common_types import common_types_pb2
 from .proto import libc_to_manage_pb2
 from .qmpc_server import QMPCServer
@@ -23,6 +21,7 @@ PredictMethod \
 JobErrorInfo = common_types_pb2.JobErrorInfo
 ColumnSchema = libc_to_manage_pb2.ColumnSchema
 ShareValueTypeEnum = common_types_pb2.ShareValueTypeEnum
+
 
 @dataclass(frozen=True)
 class QMPC:
