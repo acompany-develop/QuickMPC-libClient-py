@@ -8,7 +8,8 @@ from grpc_status import rpc_status
 
 from quickmpc.proto import libc_to_manage_pb2, libc_to_manage_pb2_grpc
 from quickmpc.proto.common_types import common_types_pb2
-from quickmpc.proto.common_types.common_types_pb2 import JobErrorInfo
+from quickmpc.proto.common_types.common_types_pb2 import (JobErrorInfo,
+                                                          Stacktrace)
 
 
 class LibToManageServiceServicer(libc_to_manage_pb2_grpc.LibcToManageServicer):
@@ -107,6 +108,16 @@ class LibToManageServiceServicer(libc_to_manage_pb2_grpc.LibcToManageServicer):
             is_ok=True,
             result="['1']",
             schema=["s"]
+        )
+        return res
+
+    def GetJobErrorInfo(self, request, context):
+        res = libc_to_manage_pb2.GetJobErrorInfoResponse(
+            is_ok=True,
+            job_error_info=JobErrorInfo(
+                what="QMPCJobError",
+                stacktrace=Stacktrace()
+            )
         )
         return res
 

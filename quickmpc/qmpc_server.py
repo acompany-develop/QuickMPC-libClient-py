@@ -26,7 +26,8 @@ from .proto.libc_to_manage_pb2 import (DeleteSharesRequest,
                                        GetDataListRequest,
                                        GetElapsedTimeRequest, Input, JoinOrder,
                                        PredictRequest, SendModelParamRequest,
-                                       SendSharesRequest)
+                                       SendSharesRequest,
+                                       GetJobErrorInfoRequest)
 from .proto.libc_to_manage_pb2_grpc import LibcToManageStub
 from .share import Share
 from .utils.if_present import if_present
@@ -408,3 +409,23 @@ class QMPCServer:
         results = if_present(results, Share.recons)
         return {"is_ok": is_ok, "statuses": statuses,
                 "results": results, "progresses": progresses}
+
+    def get_job_error_info(self, job_uuid: str) -> Dict:
+        # リクエストパラメータを設定
+        req = GetJobErrorInfoRequest(
+            job_uuid=job_uuid,
+            token=self.token
+        )
+        # 非同期にリクエスト送信
+        executor = ThreadPoolExecutor()
+        futures = [executor.submit(stub.GetJobErrorInfo, req)
+                   for stub in self.__client_stubs]
+        is_ok, response = QMPCServer.__futures_result(
+            futures, enable_progress_bar=False)
+
+        job_error_info = [
+            res.job_error_info if res.HasField("job_error_info") else None
+            for res in response
+        ]
+
+        return {"is_ok": is_ok, "job_error_info": job_error_info}
